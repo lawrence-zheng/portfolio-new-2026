@@ -1,0 +1,21 @@
+/* Simplified approach for better centering */
+.hero-text-wrap {
+  width: 100%;
+  text-align: center;
+}
+
+/* Allow wrapping on all screen sizes by default */
+.headline-text {
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Only prevent wrapping on larger screens */
+@media (min-width: 1024px) {
+  .headline-text {
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: visible;
+  }
+}

@@ -1,0 +1,35 @@
+.pixel-decoration {
+  position: absolute;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.pixel-decoration:hover {
+  opacity: 1;
+  transform: scale(1.1);
+  filter: brightness(1.2);
+  cursor: pointer;
+}
+
+/* Responsive sizing for decorations */
+@media (min-width: 768px) {
+  .pixel-decoration.md-larger {
+    transform: scale(1.3);
+  }
+
+  .pixel-decoration.md-larger:hover {
+    transform: scale(1.4);
+  }
+}
+
+@media (min-width: 1024px) {
+  .pixel-decoration.lg-larger {
+    transform: scale(1.6);
+  }
+
+  .pixel-decoration.lg-larger:hover {
+    transform: scale(1.7);
+  }
+}

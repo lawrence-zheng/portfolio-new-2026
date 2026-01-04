@@ -1,0 +1,16 @@
+/* This CSS ensures the banner background extends fully across the screen */
+.banner-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.banner-background {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  height: 180px;
+  bottom: 0;
+  background-color: #dae4f0;
+}
