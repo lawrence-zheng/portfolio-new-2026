@@ -343,18 +343,6 @@ export default function PlaceholderProject() {
                       portfolio case studies.
                     </p>
             </div>
-<<<<<<< HEAD
-            <h1 className="text-3xl md:text-4xl font-serif font-normal uppercase tracking-tight leading-tight text-center">
-              Project Title Goes Here
-            </h1>
-          </div>
-
-          {/* 3-column layout for project details */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Left column: My Role, Timeframe, Skills Used */}
-            <div className="space-y-6">
-=======
->>>>>>> 24d84734baacd3ca5b424b55b7ff04ae5849a8bf
               <div>
                     <h3 className="font-semibold text-gray-900 mb-2">My Role</h3>
                     <p className="text-gray-600 text-sm">
@@ -407,39 +395,6 @@ export default function PlaceholderProject() {
           <div className="lg:col-span-5 space-y-16">
             {/* Overview Section */}
             <section ref={overviewRef} id="overview" className="scroll-mt-24">
-<<<<<<< HEAD
-              <h2 className="text-2xl font-serif font-normal uppercase tracking-tight mb-6">Overview</h2>
-              <p className="text-gray-800 mb-4">
-                This section provides a comprehensive overview of the project, including the context, goals, and
-                high-level approach. It sets the stage for the more detailed sections that follow.
-              </p>
-
-              {/* Info Cards Group - New Component */}
-              <InfoCardGroup cards={infoCards} accentColor={primaryColor} />
-
-              {/* Emphasized, Full-width Quotation */}
-              <Quotation
-                attribution="Project Stakeholder, VP of Product"
-                isEmphasized={true}
-                isFullWidth={true}
-                accentColor={primaryColor}
-              >
-                The team's approach to solving this complex problem was exceptional. They balanced user needs with
-                technical constraints in a way that exceeded our expectations.
-              </Quotation>
-
-              <p className="text-gray-800 mb-4">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu
-                sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor.
-              </p>
-
-              {/* Key Insight Component */}
-              <div className="my-12">
-                <KeyInsight>
-                  By understanding the core user needs and aligning them with business objectives, we created a solution
-                  that increased engagement by 45%.
-                </KeyInsight>
-=======
               <div className="section-header">
                 <div className="section-content relative z-10">
                   <div className="section-subtitle mb-2 text-left">
@@ -449,7 +404,6 @@ export default function PlaceholderProject() {
                     Component Library Reference
                   </h2>
                 </div>
->>>>>>> 24d84734baacd3ca5b424b55b7ff04ae5849a8bf
               </div>
               <p className="text-gray-800 mb-6">
                 This page serves as a comprehensive reference for all the reusable components used across the portfolio
@@ -466,37 +420,6 @@ export default function PlaceholderProject() {
 
             {/* Problem Section */}
             <section ref={problemRef} id="problem" className="scroll-mt-24">
-<<<<<<< HEAD
-              <h2 className="text-2xl font-serif font-normal uppercase tracking-tight mb-6">Problem</h2>
-              <p className="text-gray-800 mb-4">
-                This section clearly articulates the problem that the project aimed to solve. It includes relevant
-                context, user pain points, and business challenges.
-              </p>
-
-              {/* Non-emphasized, Half-width Quotation */}
-              <Quotation
-                attribution="User Research Participant"
-                isEmphasized={false}
-                isFullWidth={false}
-                accentColor={primaryColor}
-              >
-                I spend at least 30 minutes every day just trying to find the right information. It's frustrating and
-                takes time away from my actual work.
-              </Quotation>
-
-              <p className="text-gray-800 mb-4">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu
-                sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor.
-              </p>
-              <div className="my-8 border border-gray-200 rounded-md overflow-hidden">
-                <Image
-                  src="/problem-analysis-diagram.png"
-                  alt="Problem analysis diagram"
-                  width={800}
-                  height={400}
-                  className="w-full"
-                />
-=======
               <div className="section-header">
                 <div className="section-content relative z-10">
                   <div className="section-subtitle mb-2 text-left">
@@ -506,7 +429,6 @@ export default function PlaceholderProject() {
                     Maintaining Component Consistency
                   </h2>
                 </div>
->>>>>>> 24d84734baacd3ca5b424b55b7ff04ae5849a8bf
               </div>
               <p className="text-gray-800 mb-6">
                 As the portfolio grew with multiple case studies, maintaining consistency across components became
@@ -522,19 +444,6 @@ export default function PlaceholderProject() {
 
             {/* Process Section */}
             <section ref={processRef} id="process" className="scroll-mt-24">
-<<<<<<< HEAD
-              <h2 className="text-2xl font-serif font-normal uppercase tracking-tight mb-6">Process</h2>
-              <p className="text-gray-800 mb-4">
-                This section outlines the design process, including research methods, ideation techniques, and testing
-                approaches. It provides insight into how the solution was developed.
-              </p>
-
-              {/* Timeline Component */}
-              <div className="my-8 border border-gray-200 rounded-lg p-6 bg-gray-50">
-                <h3 className="text-lg font-medium mb-4">Project Timeline</h3>
-                <div className="overflow-hidden">
-                  <ProjectTimeline phases={timelinePhases} totalWeeks={8} accentColor={primaryColor} />
-=======
               <div className="section-header">
                 <div className="section-content relative z-10">
                   <div className="section-subtitle mb-2 text-left">
@@ -543,7 +452,6 @@ export default function PlaceholderProject() {
                   <h2 className="text-3xl md:text-4xl font-sans font-bold tracking-tight mb-8 text-left normal-case">
                     Component Documentation Process
                   </h2>
->>>>>>> 24d84734baacd3ca5b424b55b7ff04ae5849a8bf
                 </div>
               </div>
               <p className="text-gray-800 mb-6">
@@ -559,12 +467,6 @@ export default function PlaceholderProject() {
 
             {/* Solution Section */}
             <section ref={solutionRef} id="solution" className="scroll-mt-24">
-<<<<<<< HEAD
-              <h2 className="text-2xl font-serif font-normal uppercase tracking-tight mb-6">Solution</h2>
-              <p className="text-gray-800 mb-4">
-                This section presents the final solution, including key features, design decisions, and how it addresses
-                the identified problems. It showcases the outcome of the design process.
-=======
               <div className="section-header">
                 <div className="section-content relative z-10">
                   <div className="section-subtitle mb-2 text-left">
@@ -579,7 +481,6 @@ export default function PlaceholderProject() {
                 Created a comprehensive component library page that serves as both documentation and a testing ground for
                 all reusable components. This page includes interactive examples, usage guidelines, and implementation
                 details for each component.
->>>>>>> 24d84734baacd3ca5b424b55b7ff04ae5849a8bf
               </p>
               <p className="text-gray-800 mb-6">
                 The library is organized by component type and includes real-world usage examples from actual case
@@ -801,15 +702,6 @@ export default function PlaceholderProject() {
                       </div>
                     </div>
 
-<<<<<<< HEAD
-            {/* Learnings Section - New Section */}
-            <section ref={learningsRef} id="learnings" className="scroll-mt-24">
-              <h2 className="text-2xl font-serif font-normal tracking-tight mb-6">Learnings</h2>
-              <p className="text-gray-800 mb-6">
-                Throughout this project, we gained valuable insights that will inform our approach to future work. Here
-                are the key learnings from this experience:
-              </p>
-=======
                     <div>
                       <h5 className="text-sm font-medium text-gray-600 mb-2">Non-Emphasized Full-Width Quotation</h5>
                       <div className="bg-white p-4 rounded border">
@@ -825,7 +717,6 @@ export default function PlaceholderProject() {
                 </div>
               </div>
                 </div>
->>>>>>> 24d84734baacd3ca5b424b55b7ff04ae5849a8bf
 
                                 <div className="bg-gray-50 p-6 rounded-lg mb-6">
                   <h4 className="text-lg font-semibold mb-4">Learning Component Variations</h4>
@@ -882,62 +773,7 @@ export default function PlaceholderProject() {
                             creative ideas that wouldn't have emerged from a siloed design process.
                 </p>
               </Learning>
-<<<<<<< HEAD
-
-              {/* Learning 3 */}
-              <Learning
-                summary="Iterative testing reveals unexpected user behaviors and preferences"
-                accentColor={primaryColor}
-                icon={
-                  <div className="flex items-center justify-center">
-                    <Image src="/pixel-deco/lightbulb-learning.png" alt="Lightbulb icon" width={28} height={28} />
-                  </div>
-                }
-              >
-                <p>
-                  Our initial assumptions about how users would interact with certain features were often challenged
-                  during testing. For example, we found that users preferred a more guided approach to complex tasks
-                  than we had anticipated. By conducting multiple rounds of testing and being willing to pivot based on
-                  feedback, we were able to refine the design to better match actual user behaviors. This iterative
-                  approach, while requiring more time upfront, ultimately saved resources by ensuring we built the right
-                  solution.
-                </p>
-              </Learning>
-            </section>
-
-            {/* Results Section */}
-            <section ref={resultsRef} id="results" className="scroll-mt-24">
-              <h2 className="text-2xl font-serif font-normal uppercase tracking-tight mb-6">Results</h2>
-              <p className="text-gray-800 mb-4">
-                This section presents the outcomes and impact of the project, including metrics, user feedback, and
-                business results. It demonstrates the value of the design solution.
-              </p>
-
-              {/* Emphasized, Half-width Quotation */}
-              <Quotation attribution="End User" isEmphasized={true} isFullWidth={false} accentColor={primaryColor}>
-                The new system has completely transformed how I work. What used to take me hours now takes minutes, and
-                I can focus on more important tasks.
-              </Quotation>
-
-              <p className="text-gray-800 mb-4">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu
-                sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor.
-              </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 mt-12">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 flex items-center justify-center">
-                    <Image src="/dx-capture.png" alt="Metric icon" width={48} height={48} />
-                  </div>
-                  <div>
-                    <div
-                      className="text-2xl font-sans font-bold transition-colors duration-500"
-                      style={{ color: primaryColor }}
-                    >
-                      45% INCREASE
-=======
                       </div>
->>>>>>> 24d84734baacd3ca5b424b55b7ff04ae5849a8bf
                     </div>
                   </div>
                 </div>

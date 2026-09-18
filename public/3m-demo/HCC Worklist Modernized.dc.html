@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script>
+  // Opt into cross-document view transitions ONLY for in-app link navigations.
+  // Programmatic reloads (preview tooling) get no transition, so the browser never
+  // creates a skippable transition whose promise would reject on the console.
+  (function () {
+    try {
+      if (sessionStorage.getItem('vtNav') === '1') {
+        sessionStorage.removeItem('vtNav');
+        document.write('<style>@view-transition { navigation: auto; }</style>');
+      }
+    } catch (_) {}
+    document.addEventListener('click', function (ev) {
+      var t = ev.target;
+      var a = t && t.closest ? t.closest('a[href]') : null;
+      if (a && /\.dc\.html(\?.*)?$/i.test(a.getAttribute('href') || '')) {
+        try { sessionStorage.setItem('vtNav', '1'); } catch (_) {}
+        var st = document.createElement('style');
+        st.textContent = '@view-transition { navigation: auto; }';
+        document.head.appendChild(st);
+      }
+    }, true);
+    window.addEventListener('pageswap', function (e) {
+      if (e.viewTransition) { e.viewTransition.finished.catch(function () {}); }
+    });
+    window.addEventListener('pagereveal', function (e) {
+      if (e.viewTransition) {
+        e.viewTransition.ready.catch(function () {});
+        e.viewTransition.finished.catch(function () {});
+      }
+    });
+    window.addEventListener('unhandledrejection', function (e) {
+      var m = String((e.reason && e.reason.message) || e.reason);
+      if (m.indexOf('skipped') !== -1) e.preventDefault();
+    });
+    // Tooltips only for cells whose text is actually cut off by ellipsis
+    document.addEventListener('mouseover', function (ev) {
+      var t = ev.target;
+      var tip = t && t.closest ? t.closest('.cell-tip') : null;
+      if (!tip) return;
+      var inner = tip.firstElementChild;
+      if (inner && inner.scrollWidth > inner.clientWidth + 1) tip.setAttribute('data-trunc', '');
+      else tip.removeAttribute('data-trunc');
+    }, true);
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #eef1f4; }
+  * { box-sizing: border-box; }
+  a { color: #1878b9; }
+  a:hover { color: #136499; }
+  .cell-tip { position: relative; min-width: 0; }
+  .cell-tip[data-trunc]:hover::after { content: attr(data-tip); position: absolute; left: 0; bottom: calc(100% + 7px); z-index: 70; width: max-content; max-width: 300px; white-space: normal; background: #1c2b36; color: #ffffff; font-size: 12px; font-weight: 500; line-height: 1.4; padding: 6px 10px; border-radius: 7px; box-shadow: 0 4px 14px rgba(16,42,67,0.28); pointer-events: none; animation: fadeIn 0.12s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: none;} }
+  @keyframes pageIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none;} }
+  /* Cross-document view transitions (opt-in injected by head script on link clicks) */
+  header { view-transition-name: app-header; }
+  main { view-transition-name: page-main; }
+  ::view-transition-old(page-main) { animation-duration: 0.22s; }
+  ::view-transition-new(page-main) { animation-duration: 0.22s; }
+</style>
+</helmet>
+
+<div data-screen-label="Worklist" style="min-width: 1200px; min-height: 100vh; background: #eef1f4; font-family: 'IBM Plex Sans', sans-serif; color: #1c2b36; display: flex; flex-direction: column;">
+
+  <!-- ===================== App header ===================== -->
+  <header style="background: #ffffff; border-bottom: 1px solid #e2e8ee; padding: 0 28px; height: 76px; display: flex; align-items: center; gap: 16px; flex-shrink: 0; position: relative; z-index: 80;">
+    <div style="display: flex; flex-direction: column; gap: 3px;">
+      <button style="display: inline-flex; align-items: center; gap: 8px; background: transparent; border: none; padding: 0; font-family: 'IBM Plex Sans', sans-serif; cursor: pointer;">
+        <h1 style="margin: 0; font-size: 20px; font-weight: 600; color: #1c2b36; line-height: 1;">Recent patients (Post-visit)</h1>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="color: #6b7883;"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </button>
+      <div style="display: inline-flex; align-items: center; gap: 6px;">
+        <span style="width: 7px; height: 7px; border-radius: 50%; background: #e8a13c;"></span>
+        <span style="font-size: 13px; color: #6b7883; font-weight: 500;">{{ statusLine }}</span>
+      </div>
+    </div>
+
+    <div style="width: 1px; height: 40px; background: #e6ebf0;"></div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.09em; color: #93a1ac; text-transform: uppercase;">HCC capture summary</div>
+      <div style="display: flex; align-items: center; gap: 24px;">
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 12px; color: #8a97a2;">Patients</span>
+          <span style="font-size: 14px; font-weight: 600; color: #2c3b46;">{{ totalCount }}</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 12px; color: #8a97a2;">Awaiting review</span>
+          <span style="font-size: 14px; font-weight: 600; color: #2c3b46;">{{ totalAwait }}</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 12px; color: #8a97a2;">Total RAF gap</span>
+          <span style="font-size: 14px; font-weight: 700; color: #1e7a43;">{{ totalGap }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex: 1;"></div>
+
+    <span style="position: relative; display: inline-flex; align-items: center;">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="position: absolute; left: 11px; color: #9aa7b1; pointer-events: none;"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"></circle><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+      <input value="{{ search }}" onChange="{{ onSearch }}" onFocus="{{ onSearchFocus }}" onBlur="{{ onSearchBlur }}" placeholder="Search by name or MRN&hellip;" style="width: 260px; height: 34px; border: 1px solid #c9d3db; border-radius: 9px; padding: 0 12px 0 32px; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; color: #2c3b46; background: #ffffff; outline: none; transition: border-color 0.15s, box-shadow 0.15s;" style-focus="border-color: #1878b9; box-shadow: 0 0 0 3px rgba(24,120,185,0.12);"></input>
+      <sc-if value="{{ showRecent }}" hint-placeholder-val="{{ false }}">
+        <span style="position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 50; background: #ffffff; border: 1px solid #dde4ea; border-radius: 10px; box-shadow: 0 8px 24px rgba(16,42,67,0.16); padding: 6px; display: flex; flex-direction: column; gap: 2px; animation: fadeIn 0.15s ease;">
+          <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.07em; color: #93a1ac; text-transform: uppercase; padding: 6px 8px 4px;">Recent</span>
+          <sc-for list="{{ recentPatients }}" as="rp" hint-placeholder-count="2">
+            <button onMouseDown="{{ rp.pick }}" style="display: flex; align-items: center; gap: 9px; background: transparent; border: none; border-radius: 7px; padding: 7px 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; color: #2c3b46; cursor: pointer; text-align: left; transition: background 0.12s;" style-hover="background: #f2f6f9;">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="color: #9aa7b1; flex-shrink: 0;"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.4"></circle><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+              <span style="font-weight: 600;">{{ rp.name }}</span>
+              <span style="color: #8a97a2; font-size: 12px;">{{ rp.mrn }}</span>
+            </button>
+          </sc-for>
+        </span>
+      </sc-if>
+    </span>
+
+    <span style="width: 1px; height: 24px; background: #e6ebf0;"></span>
+
+    <button title="Account" style="display: inline-flex; align-items: center; gap: 6px; height: 36px; border-radius: 10px; border: 1px solid #dde4ea; background: #ffffff; color: #52616d; padding: 0 9px 0 5px; cursor: pointer; transition: background 0.15s, border-color 0.15s;" style-hover="background: #f2f6f9; border-color: #c4cfd8;">
+      <span style="width: 26px; height: 26px; border-radius: 50%; background: #eef2f5; color: #6b7883; display: flex; align-items: center; justify-content: center;">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.4"></circle><path d="M2.8 13.5a5.2 5.2 0 0 1 10.4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+      </span>
+      <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </button>
+  </header>
+
+  <!-- ===================== Toolbar ===================== -->
+  <nav style="background: #ffffff; border-bottom: 1px solid #e2e8ee; padding: 0 28px; height: 46px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; position: relative; z-index: 75;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <sc-for list="{{ quickFilters }}" as="qf" hint-placeholder-count="5">
+        <button onClick="{{ qf.select }}" style="display: inline-flex; align-items: center; gap: 6px; background: {{ qf.bg }}; border: 1px solid {{ qf.border }}; border-radius: 20px; padding: 4px 13px; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; color: {{ qf.color }}; cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s;" style-hover="border-color: #7fb4d9; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(16,42,67,0.10);">
+          {{ qf.label }}
+        </button>
+      </sc-for>
+      <span style="position: relative; display: inline-flex;">
+        <button onClick="{{ toggleQvMenu }}" style="display: inline-flex; align-items: center; gap: 6px; background: #f6fafd; border: 1.5px dashed #9cc4e0; border-radius: 20px; padding: 4px 13px; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; color: #1878b9; cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.15s, box-shadow 0.15s;" style-hover="background: #e3f0f9; border-color: #1878b9; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(24,120,185,0.14);">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2.5v11M2.5 8h11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+          Add new quick view
+        </button>
+        <sc-if value="{{ qvMenuOpen }}" hint-placeholder-val="{{ false }}">
+          <span style="position: absolute; top: calc(100% + 8px); left: 0; z-index: 40; width: 310px; background: #ffffff; border: 1px solid #dde4ea; border-radius: 12px; box-shadow: 0 8px 24px rgba(16,42,67,0.16); padding: 8px; display: flex; flex-direction: column; gap: 2px; animation: fadeIn 0.15s ease;">
+            <button onClick="{{ qvFromFilters }}" style="display: flex; align-items: flex-start; gap: 10px; background: transparent; border: none; border-radius: 8px; padding: 9px 10px; font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; text-align: left; transition: background 0.12s;" style-hover="background: #f2f6f9;">
+              <span style="width: 28px; height: 28px; border-radius: 8px; background: #e3f0f9; color: #1878b9; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M4.5 8h7M7 12h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+              </span>
+              <span style="display: flex; flex-direction: column; gap: 1px;">
+                <span style="font-size: 13px; font-weight: 600; color: #1c2b36;">Create from current filters</span>
+                <span style="font-size: 12px; color: #8a97a2; line-height: 1.35;">Save the active filters and sorting as a one-click view</span>
+              </span>
+            </button>
+            <button onClick="{{ qvImportCsv }}" style="display: flex; align-items: flex-start; gap: 10px; background: transparent; border: none; border-radius: 8px; padding: 9px 10px; font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; text-align: left; transition: background 0.12s;" style-hover="background: #f2f6f9;">
+              <span style="width: 28px; height: 28px; border-radius: 8px; background: #eaf6ef; color: #1e7a43; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 10V3M5 5.5L8 2.5l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 13h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+              </span>
+              <span style="display: flex; flex-direction: column; gap: 1px;">
+                <span style="font-size: 13px; font-weight: 600; color: #1c2b36;">Import a patient list</span>
+                <span style="font-size: 12px; color: #8a97a2; line-height: 1.35;">Upload a CSV or Microsoft Access export</span>
+              </span>
+            </button>
+          </span>
+        </sc-if>
+      </span>
+    </div>
+    <div style="flex: 1;"></div>
+    <button style="display: inline-flex; align-items: center; gap: 7px; background: transparent; border: none; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; color: #1878b9; cursor: pointer; transition: color 0.15s;" style-hover="color: #136499;">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M4.5 8h7M7 12h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+      Filters
+    </button>
+    <span style="width: 1px; height: 20px; background: #dfe6ec;"></span>
+    <button style="display: inline-flex; align-items: center; gap: 7px; background: transparent; border: none; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; color: #1878b9; cursor: pointer; transition: color 0.15s;" style-hover="color: #136499;">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      Refresh
+    </button>
+    <span style="font-size: 12px; color: #8a97a2;">Updated a minute ago</span>
+  </nav>
+
+  <!-- ===================== Content ===================== -->
+  <main style="flex: 1; padding: 20px 28px 28px; display: flex; flex-direction: column; gap: 18px;">
+
+    <!-- ============ Awaiting CDI review ============ -->
+    <section style="background: #ffffff; border: 1px solid #e2e8ee; border-radius: 14px; box-shadow: 0 1px 3px rgba(16,42,67,0.05);">
+      <div style="display: flex; align-items: center; gap: 9px; padding: 14px 20px 12px;">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: #e8a13c;"></span>
+        <h2 style="margin: 0; font-size: 15px; font-weight: 600; color: #1c2b36;">Awaiting CDI review</h2>
+        <span style="font-size: 12px; font-weight: 700; color: #8a6414; background: #fdf4e3; border-radius: 9px; padding: 1px 8px;">{{ awaitCount }}</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 64px 76px 74px 90px 1.25fr 88px 1.1fr 1.6fr 112px 68px 1fr; gap: 12px; align-items: center; padding: 9px 20px; background: #fbfcfd; border-top: 1px solid #eef2f5; border-bottom: 1px solid #eef2f5;">
+        <sc-for list="{{ awaitHeaders }}" as="hc" hint-placeholder-count="9">
+          <span style="position: relative; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;">
+            <button onClick="{{ hc.sort }}" style="display: inline-flex; align-items: center; gap: 4px; background: none; border: none; padding: 0; font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.07em; color: {{ hc.color }}; text-transform: uppercase; cursor: {{ hc.cursor }}; transition: color 0.15s;" style-hover="color: #1878b9;">
+              {{ hc.label }}
+              <sc-if value="{{ hc.showArrow }}" hint-placeholder-val="{{ false }}">
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none" style="transform: rotate({{ hc.arrowRot }}); transition: transform 0.15s;"><path d="M8 3v10M4.5 9.5L8 13l3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </sc-if>
+            </button>
+            <sc-if value="{{ hc.isMeat }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ hc.toggleFilter }}" title="Filter by MEAT status" style="position: relative; width: 20px; height: 20px; border-radius: 6px; border: none; background: {{ hc.filterBtnBg }}; color: {{ hc.filterBtnColor }}; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s, color 0.15s;" style-hover="background: #e3f0f9; color: #1878b9;">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M4.5 8h7M7 12h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+                <sc-if value="{{ hc.filterActive }}" hint-placeholder-val="{{ false }}">
+                  <span style="position: absolute; top: 1px; right: 1px; width: 6px; height: 6px; border-radius: 50%; background: #1878b9;"></span>
+                </sc-if>
+              </button>
+              <sc-if value="{{ hc.filterOpen }}" hint-placeholder-val="{{ false }}">
+                <span style="position: absolute; top: calc(100% + 8px); right: -10px; z-index: 30; width: 250px; background: #ffffff; border: 1px solid #dde4ea; border-radius: 12px; box-shadow: 0 6px 20px rgba(16,42,67,0.16); padding: 14px; display: flex; flex-direction: column; gap: 10px; animation: fadeIn 0.15s ease; text-transform: none; letter-spacing: normal;">
+                  <span style="font-size: 13px; font-weight: 600; color: #1c2b36; line-height: 1.35;">Show visits with completion status of MEAT evidence:</span>
+                  <span style="display: flex; flex-direction: column; gap: 2px;">
+                    <sc-for list="{{ filterOptions }}" as="opt" hint-placeholder-count="3">
+                      <button onClick="{{ opt.toggle }}" style="display: flex; align-items: center; gap: 9px; background: transparent; border: none; border-radius: 7px; padding: 6px 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 500; color: #2c3b46; cursor: pointer; text-align: left; transition: background 0.12s;" style-hover="background: #f2f6f9;">
+                        <span style="width: 16px; height: 16px; border-radius: 5px; border: 1.5px solid {{ opt.boxBorder }}; background: {{ opt.boxBg }}; display: flex; align-items: center; justify-content: center; color: #ffffff; transition: background 0.12s, border-color 0.12s;">
+                          <sc-if value="{{ opt.checked }}" hint-placeholder-val="{{ false }}">
+                            <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12 13 4.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                          </sc-if>
+                        </span>
+                        {{ opt.label }}
+                      </button>
+                    </sc-for>
+                  </span>
+                  <span style="display: flex; gap: 8px; padding-top: 2px;">
+                    <button onClick="{{ applyFilter }}" style="flex: 1; background: #1878b9; color: #ffffff; border: none; border-radius: 8px; padding: 7px 0; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s;" style-hover="background: #136499;">Apply filter</button>
+                    <button onClick="{{ clearFilter }}" style="flex: 1; background: #ffffff; color: #2c3b46; border: 1px solid #c9d3db; border-radius: 8px; padding: 7px 0; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s;" style-hover="background: #f2f6f9;">Clear filter</button>
+                  </span>
+                </span>
+              </sc-if>
+            </sc-if>
+          </span>
+        </sc-for>
+      </div>
+
+      <sc-for list="{{ awaitRows }}" as="row" hint-placeholder-count="5">
+        <a href="{{ row.href }}" style="display: grid; grid-template-columns: 64px 76px 74px 90px 1.25fr 88px 1.1fr 1.6fr 112px 68px 1fr; gap: 12px; align-items: center; padding: 12px 20px; border-bottom: 1px solid #eef2f5; text-decoration: none; color: inherit; cursor: pointer; transition: background 0.15s;" style-hover="background: #f5fafd;">
+          <span style="font-size: 13px; font-weight: 600; color: #2c3b46; font-variant-numeric: tabular-nums;">{{ row.raf }}</span>
+          <span style="font-size: 13px; font-weight: 600; color: #3d4d59; font-variant-numeric: tabular-nums;">{{ row.pot }}</span>
+          <span style="justify-self: start; font-size: 12px; font-weight: 700; color: {{ row.gapColor }}; background: {{ row.gapBg }}; border-radius: 8px; padding: 2px 8px; font-variant-numeric: tabular-nums;">{{ row.gapLabel }}</span>
+          <span style="font-size: 13px; font-weight: 600; color: #1878b9;">{{ row.mrn }}</span>
+          <span class="cell-tip" data-tip="{{ row.name }}"><span style="display: block; font-size: 14px; font-weight: 600; color: #1c2b36; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ row.name }}</span></span>
+          <span style="font-size: 13px; color: #5a6a76; font-variant-numeric: tabular-nums;">{{ row.date }}</span>
+          <span class="cell-tip" data-tip="{{ row.practitioner }}"><span style="display: block; font-size: 13px; color: #3d4d59; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ row.practitioner }}</span></span>
+          <span class="cell-tip" data-tip="{{ row.dxTitle }}"><span style="display: block; font-size: 13px; color: #3d4d59; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong style="color: #1c2b36;">{{ row.dxCode }}</strong> {{ row.dxLabel }}{{ row.dxMore }}</span></span>
+          <span style="justify-self: start; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: {{ row.meatColor }}; background: {{ row.meatBg }}; border-radius: 20px; padding: 3px 10px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ row.meatDot }};"></span>
+            {{ row.meat }}
+          </span>
+          <span title="{{ row.notifTitle }}" style="justify-self: start; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: {{ row.notifColor }}; background: {{ row.notifBg }}; border-radius: 20px; padding: 3px 9px;">
+            <sc-if value="{{ row.notifOn }}" hint-placeholder-val="{{ true }}">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2a4 4 0 0 0-4 4v3l-1.2 2h10.4L12 9V6a4 4 0 0 0-4-4z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path><path d="M6.7 13.5a1.4 1.4 0 0 0 2.6 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+            </sc-if>
+            <sc-if value="{{ row.notifOff }}" hint-placeholder-val="{{ false }}">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2a4 4 0 0 0-4 4v3l-1.2 2h10.4L12 9V6a4 4 0 0 0-4-4z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path><path d="M6.7 13.5a1.4 1.4 0 0 0 2.6 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><path d="M2.5 2l11 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+            </sc-if>
+            {{ row.notifLabel }}
+          </span>
+          <span class="cell-tip" data-tip="{{ row.location }}"><span style="display: block; font-size: 13px; color: #5a6a76; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ row.location }}</span></span>
+        </a>
+      </sc-for>
+      <sc-if value="{{ awaitEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 36px 20px; text-align: center; font-size: 14px; color: #8a97a2;">No patients match your search or filters.</div>
+      </sc-if>
+      <div style="height: 6px;"></div>
+    </section>
+
+    <!-- ============ Complete ============ -->
+    <section style="background: #ffffff; border: 1px solid #e2e8ee; border-radius: 14px; box-shadow: 0 1px 3px rgba(16,42,67,0.05);">
+      <div style="display: flex; align-items: center; gap: 9px; padding: 14px 20px 12px;">
+        <span style="width: 16px; height: 16px; border-radius: 50%; background: #1e7a43; color: #ffffff; display: flex; align-items: center; justify-content: center;">
+          <svg width="9" height="9" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12 13 4.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </span>
+        <h2 style="margin: 0; font-size: 15px; font-weight: 600; color: #1c2b36;">Review complete</h2>
+        <span style="font-size: 12px; font-weight: 700; color: #1e7a43; background: #eaf6ef; border-radius: 9px; padding: 1px 8px;">{{ doneCount }}</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 64px 76px 74px 90px 1.25fr 88px 1.1fr 1.6fr 112px 68px 1fr; gap: 12px; align-items: center; padding: 9px 20px; background: #fbfcfd; border-top: 1px solid #eef2f5; border-bottom: 1px solid #eef2f5;">
+        <sc-for list="{{ doneHeaders }}" as="hc" hint-placeholder-count="9">
+          <span style="display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;">
+            <button onClick="{{ hc.sort }}" style="display: inline-flex; align-items: center; gap: 4px; background: none; border: none; padding: 0; font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.07em; color: {{ hc.color }}; text-transform: uppercase; cursor: {{ hc.cursor }}; transition: color 0.15s;" style-hover="color: #1878b9;">
+              {{ hc.label }}
+              <sc-if value="{{ hc.showArrow }}" hint-placeholder-val="{{ false }}">
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none" style="transform: rotate({{ hc.arrowRot }}); transition: transform 0.15s;"><path d="M8 3v10M4.5 9.5L8 13l3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </sc-if>
+            </button>
+          </span>
+        </sc-for>
+      </div>
+
+      <sc-for list="{{ doneRows }}" as="row" hint-placeholder-count="2">
+        <a href="{{ row.href }}" style="display: grid; grid-template-columns: 64px 76px 74px 90px 1.25fr 88px 1.1fr 1.6fr 112px 68px 1fr; gap: 12px; align-items: center; padding: 12px 20px; border-bottom: 1px solid #eef2f5; text-decoration: none; color: inherit; cursor: pointer; transition: background 0.15s;" style-hover="background: #f5fafd;">
+          <span style="font-size: 13px; font-weight: 600; color: #2c3b46; font-variant-numeric: tabular-nums;">{{ row.raf }}</span>
+          <span style="font-size: 13px; font-weight: 600; color: #3d4d59; font-variant-numeric: tabular-nums;">{{ row.pot }}</span>
+          <span style="justify-self: start; font-size: 12px; font-weight: 700; color: {{ row.gapColor }}; background: {{ row.gapBg }}; border-radius: 8px; padding: 2px 8px; font-variant-numeric: tabular-nums;">{{ row.gapLabel }}</span>
+          <span style="font-size: 13px; font-weight: 600; color: #1878b9;">{{ row.mrn }}</span>
+          <span class="cell-tip" data-tip="{{ row.name }}"><span style="display: block; font-size: 14px; font-weight: 600; color: #1c2b36; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ row.name }}</span></span>
+          <span style="font-size: 13px; color: #5a6a76; font-variant-numeric: tabular-nums;">{{ row.date }}</span>
+          <span class="cell-tip" data-tip="{{ row.practitioner }}"><span style="display: block; font-size: 13px; color: #3d4d59; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ row.practitioner }}</span></span>
+          <span class="cell-tip" data-tip="{{ row.dxTitle }}"><span style="display: block; font-size: 13px; color: #3d4d59; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong style="color: #1c2b36;">{{ row.dxCode }}</strong> {{ row.dxLabel }}{{ row.dxMore }}</span></span>
+          <span style="justify-self: start; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: {{ row.meatColor }}; background: {{ row.meatBg }}; border-radius: 20px; padding: 3px 10px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ row.meatDot }};"></span>
+            {{ row.meat }}
+          </span>
+          <span title="{{ row.notifTitle }}" style="justify-self: start; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: {{ row.notifColor }}; background: {{ row.notifBg }}; border-radius: 20px; padding: 3px 9px;">
+            <sc-if value="{{ row.notifOn }}" hint-placeholder-val="{{ true }}">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2a4 4 0 0 0-4 4v3l-1.2 2h10.4L12 9V6a4 4 0 0 0-4-4z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path><path d="M6.7 13.5a1.4 1.4 0 0 0 2.6 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+            </sc-if>
+            <sc-if value="{{ row.notifOff }}" hint-placeholder-val="{{ false }}">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2a4 4 0 0 0-4 4v3l-1.2 2h10.4L12 9V6a4 4 0 0 0-4-4z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path><path d="M6.7 13.5a1.4 1.4 0 0 0 2.6 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><path d="M2.5 2l11 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+            </sc-if>
+            {{ row.notifLabel }}
+          </span>
+          <span class="cell-tip" data-tip="{{ row.location }}"><span style="display: block; font-size: 13px; color: #5a6a76; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ row.location }}</span></span>
+        </a>
+      </sc-for>
+      <sc-if value="{{ doneEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 36px 20px; text-align: center; font-size: 14px; color: #8a97a2;">No completed reviews match your search or filters.</div>
+      </sc-if>
+      <div style="height: 6px;"></div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    search: '',
+    searchFocused: false,
+    qvMenuOpen: false,
+    filterOpenIn: null,
+    pending: { None: false, Partial: false, Complete: false },
+    applied: null,
+    sortKey: 'gap',
+    sortDir: -1,
+    notifOnly: false
+  };
+
+  DATA = [
+    { raf: '0.545', pot: '1.468', mrn: '\u2022\u2022\u2022\u20221482', name: 'Smith, Peggy', date: '03/08/2022', practitioner: 'Dr. Philippa Gregory', dxCode: 'I48.91', dxLabel: 'Unspecified atrial fibrilliation', dxMore: ' +2', meat: 'Partial', notifOn: true, review: 'Awaiting', location: 'Family Med Clinic' },
+    { raf: '1.104', pot: '2.029', mrn: '49928', name: 'Roderick, Sanford', date: '03/15/2022', practitioner: 'Dr. Cassie Grisson', dxCode: 'E11.42', dxLabel: 'Type 2 diabetes w/ polyneuropathy', dxMore: ' +3', meat: 'Complete', notifOn: true, review: 'Complete', location: 'Family Med Clinic' },
+    { raf: '1.015', pot: '1.609', mrn: '1234395', name: 'Hoffman, Patrick', date: '03/01/2022', practitioner: 'Dr. Kat McCoy', dxCode: 'I50.32', dxLabel: 'Chronic diastolic heart failure', dxMore: ' +1', meat: 'Complete', notifOn: false, review: 'Complete', location: 'Eastside Internal Medicine' },
+    { raf: '1.008', pot: '1.902', mrn: '4020595', name: 'Hopper, Jim', date: '03/13/2022', practitioner: 'Dr. Raj Dutta', dxCode: 'J44.1', dxLabel: 'COPD w/ (acute) exacerbation', dxMore: ' +3', meat: 'Partial', notifOn: true, review: 'Awaiting', location: 'Family Med Clinic' },
+    { raf: '0.837', pot: '1.407', mrn: '4039405', name: 'Nessman, Andrew', date: '03/15/2022', practitioner: 'Dr. Peter Hanson', dxCode: 'I48.91', dxLabel: 'Unspecified atrial fibrilliation', dxMore: ' +1', meat: 'Partial', notifOn: false, review: 'Awaiting', location: 'Eastside Internal Medicine' },
+    { raf: '0.684', pot: '1.312', mrn: '50EE', name: 'Rodriguez, Ben', date: '03/13/2022', practitioner: 'Dr. Julian Bashir', dxCode: 'E11.42', dxLabel: 'Type 2 diabetes w/ polyneuropathy', dxMore: '', meat: 'None', notifOn: false, review: 'Awaiting', location: 'Family Med Clinic' },
+    { raf: '0.348', pot: '0.851', mrn: '30395855', name: 'Grant, Erika', date: '02/28/2022', practitioner: 'Dr. Raj Dutta', dxCode: 'I48.91', dxLabel: 'Unspecified atrial fibrilliation', dxMore: '', meat: 'None', notifOn: false, review: 'Awaiting', location: 'Eastside Internal Medicine' }
+  ];
+
+  sortBy(key) {
+    this.setState(s => s.sortKey === key
+      ? { sortDir: -s.sortDir }
+      : { sortKey: key, sortDir: (key === 'raf' || key === 'pot' || key === 'gap') ? -1 : 1 });
+  }
+
+  sortVal(r, key) {
+    if (key === 'raf') return parseFloat(r.raf);
+    if (key === 'pot') return parseFloat(r.pot);
+    if (key === 'gap') return parseFloat(r.pot) - parseFloat(r.raf);
+    if (key === 'date') return new Date(r.date).getTime();
+    if (key === 'meat') return { None: 0, Partial: 1, Complete: 2 }[r.meat];
+    if (key === 'notif') return r.notifOn ? 1 : 0;
+    return String(r[key] || '').toLowerCase();
+  }
+
+  renderVals() {
+    const { search, searchFocused, qvMenuOpen, filterOpenIn, pending, applied, sortKey, sortDir, notifOnly } = this.state;
+
+    const MEAT_STYLES = {
+      Complete: { color: '#1e7a43', bg: '#eaf6ef', dot: '#34a55f' },
+      Partial: { color: '#8a6414', bg: '#fdf4e3', dot: '#e8a13c' },
+      None: { color: '#6b7883', bg: '#f2f4f6', dot: '#aeb9c2' }
+    };
+
+    const filterActive = !!(applied && (applied.None || applied.Partial || applied.Complete));
+    const q = search.trim().toLowerCase();
+
+    const mkRow = r => {
+      const ms = MEAT_STYLES[r.meat];
+      const gap = parseFloat(r.pot) - parseFloat(r.raf);
+      const gapStyle = gap > 0.0005 ? { c: '#1e7a43', b: '#eaf6ef' } : { c: '#b9c4cd', b: 'transparent' };
+      const REVIEW_IDX = { 'Smith, Peggy': 1, 'Roderick, Sanford': 2, 'Hoffman, Patrick': 3, 'Hopper, Jim': 4, 'Nessman, Andrew': 5 };
+      return {
+        ...r,
+        href: 'HCC Review Modernized.dc.html' + (REVIEW_IDX[r.name] ? '?patient=' + REVIEW_IDX[r.name] : ''),
+        dxTitle: r.dxCode + ' ' + r.dxLabel + (r.dxMore ? r.dxMore + ' more diagnoses' : ''),
+        gapLabel: gap > 0.0005 ? '+' + gap.toFixed(3) : '\u2014',
+        gapColor: gapStyle.c,
+        gapBg: gapStyle.b,
+        meatColor: ms.color, meatBg: ms.bg, meatDot: ms.dot,
+        notifOff: !r.notifOn,
+        notifLabel: r.notifOn ? 'On' : 'Off',
+        notifColor: r.notifOn ? '#14618f' : '#93a1ac',
+        notifBg: r.notifOn ? '#e3f0f9' : '#f2f4f6',
+        notifTitle: r.notifOn ? 'Provider notification on' : 'Provider notification off'
+      };
+    };
+
+    const filtered = this.DATA
+      .filter(r => !q || r.name.toLowerCase().includes(q) || r.mrn.toLowerCase().includes(q))
+      .filter(r => !filterActive || applied[r.meat])
+      .filter(r => !notifOnly || r.notifOn)
+      .sort((a, b) => {
+        const va = this.sortVal(a, sortKey), vb = this.sortVal(b, sortKey);
+        return (va < vb ? -1 : va > vb ? 1 : 0) * sortDir;
+      });
+
+    const awaitRows = filtered.filter(r => r.review !== 'Complete').map(mkRow);
+    const doneRows = filtered.filter(r => r.review === 'Complete').map(mkRow);
+
+    const COLS = [
+      { label: 'RAF', key: 'raf' },
+      { label: 'Potential', key: 'pot' },
+      { label: 'RAF gap', key: 'gap' },
+      { label: 'MRN', key: 'mrn' },
+      { label: 'Patient name', key: 'name' },
+      { label: 'Visit date', key: 'date' },
+      { label: 'Practitioner', key: 'practitioner' },
+      { label: 'Visit diagnoses', key: null },
+      { label: 'MEAT evidence', key: 'meat', isMeat: true },
+      { label: 'Notif.', key: 'notif' },
+      { label: 'Location', key: 'location' }
+    ];
+    const mkHeaders = tableId => COLS.map(c => ({
+      label: c.label,
+      color: sortKey === c.key ? '#1878b9' : '#93a1ac',
+      cursor: c.key ? 'pointer' : 'default',
+      showArrow: !!c.key && sortKey === c.key,
+      arrowRot: sortDir === 1 ? '180deg' : '0deg',
+      sort: c.key ? () => this.sortBy(c.key) : () => {},
+      isMeat: !!c.isMeat,
+      filterOpen: !!c.isMeat && filterOpenIn === tableId,
+      filterActive,
+      filterBtnBg: filterActive ? '#e3f0f9' : 'transparent',
+      filterBtnColor: filterActive ? '#1878b9' : '#93a1ac',
+      toggleFilter: () => this.setState(s => ({ filterOpenIn: s.filterOpenIn === tableId ? null : tableId }))
+    }));
+
+    return {
+      awaitRows,
+      doneRows,
+      awaitEmpty: awaitRows.length === 0,
+      doneEmpty: doneRows.length === 0,
+      awaitCount: awaitRows.length,
+      doneCount: doneRows.length,
+      totalCount: this.DATA.length,
+      totalAwait: this.DATA.filter(r => r.review !== 'Complete').length,
+      totalGap: '+' + this.DATA.reduce((sum, r) => sum + (parseFloat(r.pot) - parseFloat(r.raf)), 0).toFixed(3),
+      statusLine: this.DATA.filter(r => r.review !== 'Complete').length + ' awaiting CDI review \u00b7 ' + this.DATA.filter(r => r.review === 'Complete').length + ' complete',
+      awaitHeaders: mkHeaders('await'),
+      doneHeaders: mkHeaders('done'),
+      search,
+      onSearch: e => this.setState({ search: e.target.value }),
+      onSearchFocus: () => this.setState({ searchFocused: true, qvMenuOpen: false }),
+      onSearchBlur: () => setTimeout(() => this.setState({ searchFocused: false }), 160),
+      showRecent: searchFocused && !q,
+      recentPatients: [
+        { name: 'Smith, Peggy', mrn: '••••1482', href: 'HCC Review Modernized.dc.html?patient=1' },
+        { name: 'Hopper, Jim', mrn: '4020595', href: 'HCC Review Modernized.dc.html?patient=4' }
+      ].map(rp => ({ ...rp, pick: () => {
+        try { sessionStorage.setItem('vtNav', '1'); } catch (e) {}
+        const st = document.createElement('style');
+        st.textContent = '@view-transition { navigation: auto; }';
+        document.head.appendChild(st);
+        window.location.href = rp.href;
+      } })),
+      qvMenuOpen,
+      toggleQvMenu: () => this.setState(s => ({ qvMenuOpen: !s.qvMenuOpen, searchFocused: false })),
+      qvFromFilters: () => this.setState({ qvMenuOpen: false }),
+      qvImportCsv: () => this.setState({ qvMenuOpen: false }),
+
+      quickFilters: (() => {
+        const only = key => filterActive && applied[key] && ['None', 'Partial', 'Complete'].every(k => k === key ? applied[k] : !applied[k]);
+        const pill = (label, active, select) => ({
+          label,
+          bg: active ? '#e3f0f9' : '#ffffff',
+          border: active ? '#7fb4d9' : '#dde4ea',
+          color: active ? '#14618f' : '#5a6a76',
+          select
+        });
+        const setOnly = key => {
+          const next = { None: false, Partial: false, Complete: false };
+          next[key] = true;
+          this.setState({ applied: next, pending: { ...next } });
+        };
+        return [
+          pill('All patients', !filterActive && !notifOnly, () => this.setState({ applied: null, pending: { None: false, Partial: false, Complete: false }, notifOnly: false })),
+          pill('Partial MEAT evidence', only('Partial'), () => setOnly('Partial')),
+          pill('Complete MEAT evidence', only('Complete'), () => setOnly('Complete')),
+          pill('Provider notified', notifOnly, () => this.setState(s => ({ notifOnly: !s.notifOnly })))
+        ];
+      })(),
+      filterOptions: ['None', 'Partial', 'Complete'].map(key => ({
+        label: key,
+        checked: pending[key],
+        boxBorder: pending[key] ? '#1878b9' : '#c2ccd4',
+        boxBg: pending[key] ? '#1878b9' : '#ffffff',
+        toggle: () => this.setState(s => ({ pending: { ...s.pending, [key]: !s.pending[key] } }))
+      })),
+      applyFilter: () => this.setState(s => ({ applied: { ...s.pending }, filterOpenIn: null })),
+      clearFilter: () => this.setState({ pending: { None: false, Partial: false, Complete: false }, applied: null, filterOpenIn: null })
+    };
+  }
+}
+</script>
+</body>
+</html>

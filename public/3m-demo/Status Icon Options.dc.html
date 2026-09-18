@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #e4e9ee; }
+  * { box-sizing: border-box; }
+</style>
+</helmet>
+
+<section style="padding: 40px; font-family: 'IBM Plex Sans', sans-serif; color: #1c2b36;">
+  <div style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 4px;">
+    <h1 style="margin: 0; font-size: 20px; font-weight: 600;">Status icon explorations</h1>
+    <div style="font-size: 13.5px; color: #5a6a76;">Each option shown on the two HCC 74 code rows. Statuses: prior-year documentation &middot; current-year documentation &middot; billed.</div>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start;">
+
+    <!-- ============ 1a: Tinted icon chips ============ -->
+    <div id="1a" style="width: 470px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <a href="#1a" style="font-size: 12px; font-weight: 700; color: #ffffff; background: #1878b9; border-radius: 6px; padding: 2px 8px; text-decoration: none;">1a</a>
+        <span style="font-size: 14.5px; font-weight: 600;">Tinted icon chips</span>
+      </div>
+      <div style="font-size: 12.5px; color: #5a6a76; line-height: 1.4;">Same three icons, but larger (16px) inside 26px tinted chips. Fill + color signal state at a glance; missing states are hollow with a slash.</div>
+      <div style="background: #ffffff; border: 1px solid #e2e8ee; border-radius: 12px; overflow: hidden;">
+        <div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #eef2f5;">
+          <span style="font-size: 13.5px; font-weight: 700; min-width: 50px;">I48.91</span>
+          <span style="font-size: 13.5px; color: #3d4d59; flex: 1;">Unspecified atrial fibrilliation</span>
+          <span style="display: inline-flex; gap: 6px;">
+            <span title="Documented in a prior year" style="width: 26px; height: 26px; border-radius: 8px; background: #e3f0f9; color: #1878b9; display: flex; align-items: center; justify-content: center;">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 8a5.5 5.5 0 1 1 1.6 3.9M2.5 8V5m0 3h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 5.5V8l1.8 1.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+            </span>
+            <span title="No current year documentation" style="width: 26px; height: 26px; border-radius: 8px; background: #ffffff; border: 1px dashed #c6cfd6; color: #c6cfd6; display: flex; align-items: center; justify-content: center;">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 2h5l3 3v9H4V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path><path d="M2.5 2.5l11 11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+            </span>
+            <span title="Not billed" style="width: 26px; height: 26px; border-radius: 8px; background: #ffffff; border: 1px dashed #c6cfd6; color: #c6cfd6; display: flex; align-items: center; justify-content: center;">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5v13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><path d="M11 4.6c-.7-.9-1.8-1.4-3-1.4-1.6 0-2.8.9-2.8 2.2 0 2.9 5.7 1.6 5.7 4.6 0 1.4-1.3 2.3-3 2.3-1.3 0-2.5-.5-3.2-1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><path d="M2.5 2.5l11 11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+            </span>
+          </span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px;">
+          <span style="font-size: 13.5px; font-weight: 700; min-width: 50px;">I49.5</span>
+          <span style="font-size: 13.5px; color: #3d4d59; flex: 1;">Sick sinus syndrome</span>
+          <span style="display: inline-flex; gap: 6px;">
+            <span title="No prior year documentation" style="width: 26px; height: 26px; border-radius: 8px; background: #ffffff; border: 1px dashed #c6cfd6; color: #c6cfd6; display: flex; align-items: center; justify-content: center;">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 8a5.5 5.5 0 1 1 1.6 3.9M2.5 8V5m0 3h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2.5 2.5l11 11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+            </span>
+            <span title="Documented in the current year" style="width: 26px; height: 26px; border-radius: 8px; background: #eaf6ef; color: #1e7a43; display: flex; align-items: center; justify-content: center;">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 2h5l3 3v9H4V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path><path d="M6 8h4M6 10.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+            </span>
+            <span title="Not billed" style="width: 26px; height: 26px; border-radius: 8px; background: #ffffff; border: 1px dashed #c6cfd6; color: #c6cfd6; display: flex; align-items: center; justify-content: center;">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5v13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><path d="M11 4.6c-.7-.9-1.8-1.4-3-1.4-1.6 0-2.8.9-2.8 2.2 0 2.9 5.7 1.6 5.7 4.6 0 1.4-1.3 2.3-3 2.3-1.3 0-2.5-.5-3.2-1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><path d="M2.5 2.5l11 11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 1b: Labeled pills ============ -->
+    <div id="1b" style="width: 470px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <a href="#1b" style="font-size: 12px; font-weight: 700; color: #ffffff; background: #1878b9; border-radius: 6px; padding: 2px 8px; text-decoration: none;">1b</a>
+        <span style="font-size: 14.5px; font-weight: 600;">Labeled pills</span>
+      </div>
+      <div style="font-size: 12.5px; color: #5a6a76; line-height: 1.4;">Icon + micro-label so no memorization is needed. Most self-explanatory; costs the most horizontal space.</div>
+      <div style="background: #ffffff; border: 1px solid #e2e8ee; border-radius: 12px; overflow: hidden;">
+        <div style="display: flex; flex-direction: column; gap: 7px; padding: 12px 14px; border-bottom: 1px solid #eef2f5;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 13.5px; font-weight: 700; min-width: 50px;">I48.91</span>
+            <span style="font-size: 13.5px; color: #3d4d59; flex: 1;">Unspecified atrial fibrilliation</span>
+          </div>
+          <div style="display: flex; gap: 6px; padding-left: 60px;">
+            <span style="display: inline-flex; align-items: center; gap: 5px; background: #e3f0f9; color: #1878b9; border-radius: 20px; padding: 3px 10px; font-size: 11.5px; font-weight: 600;">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2.5 8a5.5 5.5 0 1 1 1.6 3.9M2.5 8V5m0 3h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 5.5V8l1.8 1.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+              Prior yr
+            </span>
+            <span style="display: inline-flex; align-items: center; gap: 5px; background: #f2f4f6; color: #93a1ac; border-radius: 20px; padding: 3px 10px; font-size: 11.5px; font-weight: 600; text-decoration: line-through;">Current yr</span>
+            <span style="display: inline-flex; align-items: center; gap: 5px; background: #f2f4f6; color: #93a1ac; border-radius: 20px; padding: 3px 10px; font-size: 11.5px; font-weight: 600; text-decoration: line-through;">Billed</span>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 7px; padding: 12px 14px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 13.5px; font-weight: 700; min-width: 50px;">I49.5</span>
+            <span style="font-size: 13.5px; color: #3d4d59; flex: 1;">Sick sinus syndrome</span>
+          </div>
+          <div style="display: flex; gap: 6px; padding-left: 60px;">
+            <span style="display: inline-flex; align-items: center; gap: 5px; background: #f2f4f6; color: #93a1ac; border-radius: 20px; padding: 3px 10px; font-size: 11.5px; font-weight: 600; text-decoration: line-through;">Prior yr</span>
+            <span style="display: inline-flex; align-items: center; gap: 5px; background: #eaf6ef; color: #1e7a43; border-radius: 20px; padding: 3px 10px; font-size: 11.5px; font-weight: 600;">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 2h5l3 3v9H4V2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path><path d="M6 8h4M6 10.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+              Current yr
+            </span>
+            <span style="display: inline-flex; align-items: center; gap: 5px; background: #f2f4f6; color: #93a1ac; border-radius: 20px; padding: 3px 10px; font-size: 11.5px; font-weight: 600; text-decoration: line-through;">Billed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 1c: Pipeline stepper ============ -->
+    <div id="1c" style="width: 470px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <a href="#1c" style="font-size: 12px; font-weight: 700; color: #ffffff; background: #1878b9; border-radius: 6px; padding: 2px 8px; text-decoration: none;">1c</a>
+        <span style="font-size: 14.5px; font-weight: 600;">Pipeline stepper</span>
+      </div>
+      <div style="font-size: 12.5px; color: #5a6a76; line-height: 1.4;">Reframes the three statuses as a capture pipeline (prior &rarr; documented &rarr; billed). Instantly shows how far along a code is and where it stalls.</div>
+      <div style="background: #ffffff; border: 1px solid #e2e8ee; border-radius: 12px; overflow: hidden;">
+        <div style="display: flex; align-items: center; gap: 10px; padding: 14px;  border-bottom: 1px solid #eef2f5;">
+          <span style="font-size: 13.5px; font-weight: 700; min-width: 50px;">I48.91</span>
+          <span style="font-size: 13.5px; color: #3d4d59; flex: 1;">Unspecified atrial fibrilliation</span>
+          <span style="display: inline-flex; align-items: center;">
+            <span title="Documented in a prior year" style="width: 18px; height: 18px; border-radius: 50%; background: #1878b9; color: #ffffff; display: flex; align-items: center; justify-content: center;">
+              <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12 13 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </span>
+            <span style="width: 14px; height: 2px; background: #dfe6ec;"></span>
+            <span title="No current year documentation" style="width: 18px; height: 18px; border-radius: 50%; background: #ffffff; border: 1.5px dashed #c6cfd6;"></span>
+            <span style="width: 14px; height: 2px; background: #dfe6ec;"></span>
+            <span title="Not billed" style="width: 18px; height: 18px; border-radius: 50%; background: #ffffff; border: 1.5px dashed #c6cfd6;"></span>
+          </span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 14px;">
+          <span style="font-size: 13.5px; font-weight: 700; min-width: 50px;">I49.5</span>
+          <span style="font-size: 13.5px; color: #3d4d59; flex: 1;">Sick sinus syndrome</span>
+          <span style="display: inline-flex; align-items: center;">
+            <span title="No prior year documentation" style="width: 18px; height: 18px; border-radius: 50%; background: #ffffff; border: 1.5px dashed #c6cfd6;"></span>
+            <span style="width: 14px; height: 2px; background: #dfe6ec;"></span>
+            <span title="Documented in the current year" style="width: 18px; height: 18px; border-radius: 50%; background: #1e7a43; color: #ffffff; display: flex; align-items: center; justify-content: center;">
+              <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12 13 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </span>
+            <span style="width: 14px; height: 2px; background: #dfe6ec;"></span>
+            <span title="Not billed" style="width: 18px; height: 18px; border-radius: 50%; background: #ffffff; border: 1.5px dashed #c6cfd6;"></span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 1d: Column grid with header legend ============ -->
+    <div id="1d" style="width: 470px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <a href="#1d" style="font-size: 12px; font-weight: 700; color: #ffffff; background: #1878b9; border-radius: 6px; padding: 2px 8px; text-decoration: none;">1d</a>
+        <span style="font-size: 14.5px; font-weight: 600;">Aligned columns + header legend</span>
+      </div>
+      <div style="font-size: 12.5px; color: #5a6a76; line-height: 1.4;">Keeps the icons but adds a one-time legend row, and aligns statuses into fixed columns so rows can be scanned vertically like a mini table.</div>
+      <div style="background: #ffffff; border: 1px solid #e2e8ee; border-radius: 12px; overflow: hidden;">
+        <div style="display: flex; align-items: center; gap: 10px; padding: 7px 14px; background: #fbfcfd; border-bottom: 1px solid #eef2f5;">
+          <span style="flex: 1;"></span>
+          <span style="display: inline-flex; gap: 4px;">
+            <span style="width: 34px; text-align: center; font-size: 9.5px; font-weight: 700; letter-spacing: 0.05em; color: #93a1ac; text-transform: uppercase;">Prior</span>
+            <span style="width: 34px; text-align: center; font-size: 9.5px; font-weight: 700; letter-spacing: 0.05em; color: #93a1ac; text-transform: uppercase;">Curr</span>
+            <span style="width: 34px; text-align: center; font-size: 9.5px; font-weight: 700; letter-spacing: 0.05em; color: #93a1ac; text-transform: uppercase;">Billed</span>
+          </span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #eef2f5;">
+          <span style="font-size: 13.5px; font-weight: 700; min-width: 50px;">I48.91</span>
+          <span style="font-size: 13.5px; color: #3d4d59; flex: 1;">Unspecified atrial fibrilliation</span>
+          <span style="display: inline-flex; gap: 4px;">
+            <span style="width: 34px; display: flex; justify-content: center; color: #1878b9;">
+              <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M2.5 8a5.5 5.5 0 1 1 1.6 3.9M2.5 8V5m0 3h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 5.5V8l1.8 1.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+            </span>
+            <span style="width: 34px; display: flex; justify-content: center; color: #d4dbe1; font-size: 15px; font-weight: 600;">&ndash;</span>
+            <span style="width: 34px; display: flex; justify-content: center; color: #d4dbe1; font-size: 15px; font-weight: 600;">&ndash;</span>
+          </span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px;">
+          <span style="font-size: 13.5px; font-weight: 700; min-width: 50px;">I49.5</span>
+          <span style="font-size: 13.5px; color: #3d4d59; flex: 1;">Sick sinus syndrome</span>
+          <span style="display: inline-flex; gap: 4px;">
+            <span style="width: 34px; display: flex; justify-content: center; color: #d4dbe1; font-size: 15px; font-weight: 600;">&ndash;</span>
+            <span style="width: 34px; display: flex; justify-content: center; color: #1e7a43;">
+              <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M4 2h5l3 3v9H4V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path><path d="M6 8h4M6 10.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+            </span>
+            <span style="width: 34px; display: flex; justify-content: center; color: #d4dbe1; font-size: 15px; font-weight: 600;">&ndash;</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 1e: Single summary chip ============ -->
+    <div id="1e" style="width: 470px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <a href="#1e" style="font-size: 12px; font-weight: 700; color: #ffffff; background: #1878b9; border-radius: 6px; padding: 2px 8px; text-decoration: none;">1e</a>
+        <span style="font-size: 14.5px; font-weight: 600;">Single summary chip</span>
+      </div>
+      <div style="font-size: 12.5px; color: #5a6a76; line-height: 1.4;">Trades the icon triad for one plain-language chip stating what's done and what's needed. Zero learning curve; less scannable across many rows.</div>
+      <div style="background: #ffffff; border: 1px solid #e2e8ee; border-radius: 12px; overflow: hidden;">
+        <div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #eef2f5;">
+          <span style="font-size: 13.5px; font-weight: 700; min-width: 50px;">I48.91</span>
+          <span style="font-size: 13.5px; color: #3d4d59; flex: 1;">Unspecified atrial fibrilliation</span>
+          <span style="background: #fdf4e3; color: #8a6414; border-radius: 7px; padding: 3px 10px; font-size: 11.5px; font-weight: 600; white-space: nowrap;">Billed '22 &middot; needs '23 doc</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px;">
+          <span style="font-size: 13.5px; font-weight: 700; min-width: 50px;">I49.5</span>
+          <span style="font-size: 13.5px; color: #3d4d59; flex: 1;">Sick sinus syndrome</span>
+          <span style="background: #e3f0f9; color: #14618f; border-radius: 7px; padding: 3px 10px; font-size: 11.5px; font-weight: 600; white-space: nowrap;">Documented '23 &middot; not billed</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+</body>
+</html>

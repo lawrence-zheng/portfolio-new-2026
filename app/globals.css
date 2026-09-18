@@ -165,6 +165,12 @@ em {
 /* Add this to your existing globals.css */
 html {
   scroll-behavior: auto !important;
+  /* Prevent the rubber-band overscroll from revealing the colored html background above the hero / below the footer */
+  overscroll-behavior-y: none;
+}
+
+body {
+  overscroll-behavior-y: none;
 }
 
 /* If you have any existing scroll-behavior: smooth, override it */

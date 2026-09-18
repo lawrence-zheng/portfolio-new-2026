@@ -13,17 +13,24 @@ import "./mobile-layout-fix.css"
 import Navbar from "@/components/navbar"
 import { useColorContext } from "@/context/color-context"
 import CompositeThumbnail from "@/components/composite-thumbnail"
+import AboutMe from "@/components/about-me"
 
 // Define project data with categories for filtering
 interface ProjectData {
   id: string
   title: string
+  /** Concise title used in the compressed card layout */
+  shortTitle: string
   company?: string
   description: string
+  /** One-line description used in the compressed card layout */
+  shortDescription: string
   image: string
   imageAlt: string
   backgroundImage?: string
   screenImage?: string
+  /** Prototype: pre-composed pixel-art room thumbnail (screenshot baked in). Takes priority over the composite. */
+  pixelThumb?: string
   stats: {
     icon: string
     value: string
@@ -37,7 +44,6 @@ export default function Home() {
   // Use the color context
   const { primaryColor, activeTab, setActiveTab } = useColorContext()
 
-  const bannerRef = useRef<HTMLDivElement>(null)
   const filtersRef = useRef<HTMLDivElement>(null)
   const projectsContainerRef = useRef<HTMLDivElement>(null)
   const [activeFilter, setActiveFilter] = useState<string>("all")
@@ -121,13 +127,17 @@ export default function Home() {
     {
       id: "3m",
       title: "Reimagining human-AI collaboration to boost patient care for millions",
+      shortTitle: "Human-AI collaboration for better patient care",
       company: "3M",
       description:
         "At 3M, I led the end-to-end UX design and research for a suite of collaborative applications used by clinicians to reduce the time needed to go back and revise medical notes every day - and increase quality face-to-face time with patients.",
+      shortDescription:
+        "End-to-end UX for clinical AI applications that cut daily note-revision time for 250,000+ clinicians.",
       image: "/mmodal-mockup.png",
       imageAlt: "3M AI clinical documentation interface showing diagnostic code suggestions",
       backgroundImage: "/project thumbnails/mmodal background.png",
-      screenImage: "/project thumbnails/mmodal screen.png",
+      screenImage: "/project thumbnails/mmodal screen 2 large.png",
+      // pixelThumb: "/pixel-thumbs/3m.png",
       stats: [
         {
           icon: "/dx-capture.png",
@@ -145,13 +155,17 @@ export default function Home() {
     {
       id: "govini",
       title: "Modernizing U.S. government data workflows for critical defense operations",
+      shortTitle: "Modernizing U.S. defense data workflows",
       company: "Govini",
       description:
         "I led the design for a data management application that transformed how defense specialists track equipment parts, evolving the design from a MVP to a hierarchical data system that significantly improved engagement and efficiency.",
+      shortDescription:
+        "Evolved a parts-tracking MVP into a hierarchical data system that lifted engagement and efficiency.",
       image: "/bom-manager-mockup.png",
       imageAlt: "Defense inventory management application showing component details and hierarchical navigation",
       backgroundImage: "/project thumbnails/bom manager background.png",
-      screenImage: "/project thumbnails/bom manager screen.png",
+      screenImage: "/project thumbnails/bom manager screen large.png",
+      // pixelThumb: "/pixel-thumbs/govini.png",
       stats: [
         {
           icon: "/search.png", // Reusing existing icon
@@ -169,13 +183,17 @@ export default function Home() {
     {
       id: "play-for-people-skills",
       title: "Creating a social game to unlock student learning motivation",
+      shortTitle: "A social game that unlocks student motivation",
       company: "Play for People Skills",
       description:
         "After researching and testing ways to create an effective, non-boring learning environment for high school students to learn people skills, I designed a social game that was verified by learning science experts for its ability to boost student motivation.",
+      shortDescription:
+        "Award-winning social game for teaching people skills, validated by learning science experts.",
       image: "/social-game-mockup.png",
       imageAlt: "Social game interface showing educational cards and game mechanics for teaching interpersonal skills",
       backgroundImage: "/project thumbnails/p4ps background.png",
-      screenImage: "/project thumbnails/p4ps screen.png",
+      screenImage: "/project thumbnails/p4ps screen large.png",
+      // pixelThumb: "/pixel-thumbs/play-for-people-skills.png",
       stats: [
         {
           icon: "/goal-setting.png",
@@ -193,13 +211,17 @@ export default function Home() {
     {
       id: "icpsr-project",
       title: "Modernizing a search page to increase efficiency by 60%",
+      shortTitle: "Modernizing search for social science research",
       company: "ICPSR",
       description:
         "I revamped the UX and built a modern design system for the world's largest collection of social science data, enabling social science researchers to more efficiently find and discover key information.",
+      shortDescription:
+        "New search UX and design system for the world's largest social science data archive.",
       image: "/icpsr-mockup.png",
       imageAlt: "ICPSR search interface showing modernized data search and filtering capabilities",
       backgroundImage: "/project thumbnails/icpsr background.png",
-      screenImage: "/project thumbnails/icpsr screen.png",
+      screenImage: "/project thumbnails/icpsr screen large.png",
+      // pixelThumb: "/pixel-thumbs/icpsr-project.png",
       stats: [
         {
           icon: "/search.png",
@@ -217,13 +239,17 @@ export default function Home() {
     {
       id: "delallo",
       title: "Elevating family culinary connections for DeLallo",
+      shortTitle: "Elevating family culinary connections",
       company: "DeLallo",
       description:
         "Designed a unique digital experience for DeLallo that brings families together through personalized food gifting, integrating physical and digital touchpoints for a memorable brand experience.",
+      shortDescription:
+        "A personalized food-gifting experience connecting physical and digital brand touchpoints.",
       image: "/delallo-website-screenshot.png",
       imageAlt: "DeLallo website and digital gifting experience",
       backgroundImage: "/project thumbnails/delallo background.png",
-      screenImage: "/project thumbnails/delallo screen.png",
+      screenImage: "/project thumbnails/delallo screen large.png",
+      // pixelThumb: "/pixel-thumbs/delallo.png",
       stats: [
         {
           icon: "/placeholder-2n36l.png",
@@ -286,8 +312,10 @@ export default function Home() {
     return [...matchingProjects, ...otherProjects]
   }
 
-  // Get filtered and ordered projects
+  // Get filtered and ordered projects. The first project for the active filter is "featured" (full-width
+  // 60/40 treatment); the rest render as compressed cards with concise copy.
   const filteredProjects = getFilteredProjects()
+  const otherProjects = filteredProjects.slice(1)
 
   // Improved handle filter change with smoother animations
   const handleFilterChange = (filter: string) => {
@@ -364,22 +392,31 @@ export default function Home() {
     }
   }
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (bannerRef.current) {
-        const scrollPosition = window.scrollY
-        // Very subtle parallax effect (5% of scroll speed)
-        const parallaxOffset = scrollPosition * 0.05
-        bannerRef.current.style.transform = `translateY(${parallaxOffset}px)`
-      }
+  // Background for the about section - a near-white tint of each theme's hero color.
+  // The footer below uses a slightly deeper tint to differentiate the two regions.
+  const getAboutBackgroundColor = () => {
+    switch (activeTab) {
+      case "ux-research":
+        return "#FEF9F4"
+      case "ui-engineering":
+        return "#F2F4FE"
+      default:
+        return "#f0f9ff"
     }
+  }
 
-    window.addEventListener("scroll", handleScroll)
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll)
+  // Two-step pixel "fade" between the floor color and the about band (more saturated color on top),
+  // matching colors sampled from the pixel art banner
+  const getFadeBandColors = (): [string, string] => {
+    switch (activeTab) {
+      case "ux-research":
+        return ["#E4C8B6", "#FAF1EA"] // dusk/orange
+      case "ui-engineering":
+        return ["#7986BF", "#A2B6D8"] // dark/night
+      default:
+        return ["#DDE7F1", "#EBF1F9"] // default/sky
     }
-  }, [])
+  }
 
   // Get background gradient based on active tab
   const getBackgroundGradient = () => {
@@ -393,17 +430,20 @@ export default function Home() {
     }
   }
 
-  // Get banner background color based on active tab
-  const getBannerBackgroundColor = () => {
-    switch (activeTab) {
+  // Get banner background color for a given tab (sampled from the floor color at the bottom of each pixel art scene)
+  const getBannerBackgroundColor = (tabName: string = activeTab) => {
+    switch (tabName) {
       case "ux-research":
-        return "#e3c8b5" // Sunset tan
+        return "#c49e79" // Sunset tan floor
       case "ui-engineering":
-        return "#8095bf" // Evening deep blue
+        return "#5b6bab" // Evening deep blue floor
       default:
-        return "#DAE4F0" // Default light blue
+        return "#abbed8" // Default light blue floor
     }
   }
+
+  // Tabs in render order, used to crossfade the floor color the same way the banner crossfades its images
+  const bannerTabs = ["product-design", "ux-research", "ui-engineering"]
 
   // Get hero description based on active tab
   const getHeroDescription = () => {
@@ -413,7 +453,7 @@ export default function Home() {
       case "ui-engineering":
         return "I studied CS and data science, and I'm fluent in HTML/CSS/JS. My dev background enables me to collaborate smoothly with engineers, design with practicality in mind, and make the most out of cutting edge tools."
       default:
-        return 'With over 5 years of experience as a <span class="font-bold">Product Designer</span> driving end-to-end projects in fast-paced Agile teams, I embrace ambiguity in order to deliver powerful design solutions to complex systemic challenges.'
+        return 'With over 5 years of experience as a <span class="font-bold">Senior Product Designer</span> driving end-to-end projects in fast-paced Agile teams, I embrace ambiguity in order to deliver powerful design solutions to complex systemic challenges.'
     }
   }
 
@@ -478,45 +518,6 @@ export default function Home() {
     </div>
   )
 
-  // Get company logo component based on company name
-  const getCompanyLogo = (company: string) => {
-    switch (company) {
-      case "3M":
-        return (
-          <div className="h-6 mb-4">
-            <Image src="/3M_wordmark.svg" alt="3M logo" width={60} height={24} className="h-6 w-auto" />
-          </div>
-        )
-      case "Govini":
-        return (
-          <div className="h-8 mb-2">
-            <Image src="/govini-logo.png" alt="Govini logo" width={90} height={32} className="h-8 w-auto" />
-          </div>
-        )
-      case "ICPSR":
-        return (
-          <div className="h-6 mb-4">
-            <Image src="/icpsr_logo.svg" alt="ICPSR logo" width={60} height={24} className="h-6 w-auto" />
-          </div>
-        )
-      case "Play for People Skills":
-        return (
-          <div className="h-6 mb-2">
-            <Image src="/play_for_people_skills.svg" alt="Play for People Skills logo" width={120} height={24} className="h-6 w-auto" />
-          </div>
-        )
-      default:
-        if (company && company.toLowerCase().includes("delallo")) {
-          return (
-            <div className="h-8 mb-2">
-              <Image src="/delallo-logo.png" alt="Delallo Delights logo" width={160} height={32} className="h-8 w-auto" />
-            </div>
-          )
-        }
-        return null
-    }
-  }
-
   // Check if a project is password protected
   const isPasswordProtected = (projectId: string) => {
     return projectId === "3m" || projectId === "govini"
@@ -539,13 +540,13 @@ export default function Home() {
   // }
 
   return (
-    <main className="bg-white">
+    <main className="bg-white overflow-x-hidden">
       {/* Main navigation */}
       <Navbar />
 
       {/* Hero Section with animated banner below */}
       <section
-        className="pt-16 pb-3 transition-all duration-500 relative"
+        className="pt-16 pb-0 transition-all duration-500 relative"
         style={{
           background: getBackgroundGradient(),
         }}
@@ -849,39 +850,14 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Banner container with full-width wall extensions */}
-          <div className="relative w-full mt-1" style={{ height: "220px", overflow: "hidden" }}>
-            {/* Full-width container for the background */}
-            <div
-              className="absolute left-0 right-0 bottom-0 h-[180px] z-0 transition-colors duration-500"
-              style={{
-                backgroundColor: getBannerBackgroundColor(),
-              }}
-            ></div>
-
-            {/* Left wall extension - now positioned absolutely with negative left */}
-            <div
-              className="absolute bottom-0 left-[calc(-100vw+50%)] h-[180px] w-[100vw] z-10 transition-colors duration-500"
-              style={{
-                backgroundColor: getBannerBackgroundColor(),
-              }}
-            ></div>
-
-            {/* Right wall extension - now positioned absolutely with negative right */}
-            <div
-              className="absolute bottom-0 right-[calc(-100vw+50%)] h-[180px] w-[100vw] z-10 transition-colors duration-500"
-              style={{
-                backgroundColor: getBannerBackgroundColor(),
-              }}
-            ></div>
-
-            {/* Animated banner with higher z-index to show character and furniture */}
-            <div
-              ref={bannerRef}
-              className="absolute bottom-0 left-0 right-0 w-full max-w-[1200px] mx-auto z-20"
-              style={{ height: "220px", minHeight: "220px", willChange: "transform" }}
-            >
-              {/* All three banners are always present, but only one is visible based on opacity */}
+          {/* Banner container - responsive height (a proportion of the viewport width) so the room keeps a
+              consistent framing at any screen width: the pixel art always fills the full width by cropping the
+              angled side walls, while the full height (ceiling to floor) stays visible and no background color
+              shows around it. (A fixed pixel height would force either a top crop or color bars on wide screens.) */}
+          <div className="relative w-full mt-1" style={{ height: "24vw", minHeight: "240px" }}>
+            <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-screen overflow-hidden z-20">
+              {/* All three banners are always present, but only one is visible based on opacity.
+                  object-cover with a taller-than-image aspect crops the left/right edges, never the top/bottom. */}
               <div
                 className="absolute inset-0 transition-opacity duration-700"
                 style={{ opacity: activeTab === "product-design" ? 1 : 0 }}
@@ -890,8 +866,8 @@ export default function Home() {
                   src={getBannerImageSrc("product-design") || "/placeholder.svg"}
                   alt="Animated pixel art living space with character"
                   fill
-                  className="object-cover object-bottom"
-                  style={{ objectPosition: "bottom center" }}
+                  className="object-cover"
+                  style={{ objectPosition: "center bottom" }}
                   unoptimized
                   priority
                 />
@@ -905,8 +881,8 @@ export default function Home() {
                   src={getBannerImageSrc("ux-research") || "/placeholder.svg"}
                   alt="Animated pixel art living space with sunset lighting"
                   fill
-                  className="object-cover object-bottom"
-                  style={{ objectPosition: "bottom center" }}
+                  className="object-cover"
+                  style={{ objectPosition: "center bottom" }}
                   unoptimized
                   priority
                 />
@@ -920,8 +896,8 @@ export default function Home() {
                   src={getBannerImageSrc("ui-engineering") || "/placeholder.svg"}
                   alt="Animated pixel art living space with evening lighting"
                   fill
-                  className="object-cover object-bottom"
-                  style={{ objectPosition: "bottom center" }}
+                  className="object-cover"
+                  style={{ objectPosition: "center bottom" }}
                   unoptimized
                   priority
                 />
@@ -931,150 +907,178 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Projects Section Title and Filters - removed border-t class */}
-      <section className="" ref={filtersRef} id="filters-section">
-        <div className="max-w-7xl mx-auto px-6 pt-16 pb-4">
-          <div className="flex items-center justify-center gap-2 mb-6 text-center">
-            <h2 className="text-lg font-serif font-normal text-gray-800 normal-case">
-              Select an industry or project type
-            </h2>
-            <Tooltip content={tooltipContent} width="400px" position="bottom">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-gray-500 translate-y-[2px]"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 16v-4" />
-                <path d="M12 8h.01" />
-              </svg>
-            </Tooltip>
-          </div>
-
-          {/* Filter bubbles - reduced bottom margin from mb-12 to mb-6 */}
-          <div className="flex flex-wrap justify-center gap-2 mb-6">
-            {filterOptions.map((filter) => (
-              <button
-                key={filter}
-                onClick={() => handleFilterChange(filter.toLowerCase())}
-                className={`px-4 py-1.5 rounded-full font-sans text-xs md:text-sm uppercase tracking-wider transition-all duration-300 border ${
-                  activeFilter === filter.toLowerCase()
-                    ? "text-white border-transparent"
-                    : "text-gray-600 border-gray-200 hover:bg-gray-50"
-                }`}
-                style={{
-                  backgroundColor: activeFilter === filter.toLowerCase() ? primaryColor : "transparent",
-                }}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
+      {/* Floor-colored region - the room's floor color bleeds down across the rest of the page, with the project
+          entries sitting on top of it as raised cards. Color transitions with the active tab, in sync with the banner. */}
+      <div className="relative">
+        {/* Crossfading floor color. Uses the same opacity-crossfade as the banner (three stacked solid-color
+            layers, one per tab, toggled by opacity) so the background changes color on the exact same curve and
+            timing as the pixel-art banner instead of drifting via a separate CSS color interpolation. */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          {bannerTabs.map((tab) => (
+            <div
+              key={tab}
+              className="absolute inset-0 transition-opacity duration-700"
+              style={{ opacity: activeTab === tab ? 1 : 0, backgroundColor: getBannerBackgroundColor(tab) }}
+            />
+          ))}
         </div>
-      </section>
 
-      {/* Case Studies - Dynamically rendered based on filtered projects */}
-      <div
-        ref={projectsContainerRef}
-        className={`relative smooth-transition ${!projectsVisible ? "projects-transitioning" : ""}`}
-        style={{
-          opacity: projectsOpacity,
-          transform: projectsTransform,
-        }}
-      >
-        {filteredProjects.map((project, index) => (
-          <section
-            key={project.id}
-            id={`${project.id}-section`}
-            className={`py-16 border-b border-gray-200 project-section ${isFilterChanging ? "mobile-transition-active" : ""}`}
-            style={{
-              backgroundColor: index % 2 === 1 ? `${primaryColor}08` : "",
-            }}
-          >
-            <div className="max-w-7xl mx-auto px-6">
-              <div
-                className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${mobileLayoutFixed ? "mobile-layout-fixed" : ""}`}
-              >
-                {/* For odd-indexed projects (0, 2, etc.), text on left, image on right */}
-                {index % 2 === 0 ? (
+        {/* Single consolidated card holding the filter options and every project entry.
+            Sits flush against the bottom edge of the pixel-art banner (no overlap). */}
+        <div
+          className="relative z-20 max-w-7xl mx-auto px-6 pt-0 pb-8"
+          ref={filtersRef}
+          id="filters-section"
+        >
+          <div className="bg-white rounded-2xl shadow-lg p-6 md:p-10 lg:p-12">
+            {/* Filter options */}
+            <div className="flex items-center justify-center gap-2 mb-6 text-center">
+              <h2 className="text-lg font-serif font-normal text-gray-800 normal-case">
+                Select an industry or project type
+              </h2>
+              <Tooltip content={tooltipContent} width="400px" position="bottom">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-gray-500 translate-y-[2px]"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 16v-4" />
+                  <path d="M12 8h.01" />
+                </svg>
+              </Tooltip>
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-2">
+              {filterOptions.map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => handleFilterChange(filter.toLowerCase())}
+                  className={`px-4 py-1.5 rounded-full font-sans text-xs md:text-sm uppercase tracking-wider transition-all duration-300 border ${
+                    activeFilter === filter.toLowerCase()
+                      ? "text-white border-transparent"
+                      : "text-gray-600 border-gray-200 hover:bg-gray-50"
+                  }`}
+                  style={{
+                    backgroundColor: activeFilter === filter.toLowerCase() ? primaryColor : "transparent",
+                  }}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+
+            {/* Case Studies - each project is a divided section within the single shared card */}
+            <div
+              ref={projectsContainerRef}
+              className={`relative smooth-transition ${!projectsVisible ? "projects-transitioning" : ""}`}
+              style={{
+                opacity: projectsOpacity,
+                transform: projectsTransform,
+              }}
+            >
+              {/* Featured case study - the most relevant project for the active filter, full 60/40 treatment */}
+              {filteredProjects.slice(0, 1).map((project) => (
+                <div
+                  key={project.id}
+                  id={`${project.id}-section`}
+                  className={`project-section pt-10 mt-10 border-t-2 transition-colors duration-700 ${isFilterChanging ? "mobile-transition-active" : ""}`}
+                  style={{ borderTopColor: getBannerBackgroundColor() }}
+                >
+                  <div
+                    className={`grid grid-cols-1 lg:grid-cols-5 gap-10 items-center ${mobileLayoutFixed ? "mobile-layout-fixed" : ""}`}
+                  >
                   <>
-                    <div className="space-y-6 order-2 lg:order-1 transition-all duration-500 ease-in-out project-content">
-                      {project.company && getCompanyLogo(project.company)}
-                      {isPasswordProtected(project.id) && (
-                        <div className="inline-flex items-center gap-1.5 bg-gray-100 px-2.5 py-1 rounded-full text-xs font-medium text-gray-700 mb-2">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-lock"
-                          >
-                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                          </svg>
-                          Password Protected
-                        </div>
-                      )}
-                      <h2 className="text-4xl font-serif font-normal tracking-tight leading-tight normal-case">
-                        <Link
-                          href={`/${project.id}`}
-                          className="transition-colors duration-300"
-                          style={{
-                            ...titleLinkStyle,
-                            color: "rgb(31, 41, 55)"
-                          }}
+                    <div className="space-y-6 order-2 lg:order-2 lg:col-span-2 lg:pr-8 transition-all duration-500 ease-in-out project-content">
+                      {/* Eyebrow explains the layout slot; the title stays the most visible element */}
+                      <div>
+                        <p
+                          className="font-sans text-xs font-medium uppercase tracking-[0.15em] mb-2 transition-colors duration-300"
+                          style={{ color: primaryColor }}
                         >
-                          {project.title}
-                        </Link>
-                      </h2>
-                      <p className="text-gray-800 font-sans text-lg leading-relaxed">{project.description}</p>
-                      <div className="mt-10">
-                        <Link href={`/${project.id}`}>
-                          <button
-                            className="px-6 py-3 text-white rounded-md font-medium hover:opacity-90 transition-colors"
-                            style={{ backgroundColor: primaryColor }}
+                          Featured
+                          {activeFilter !== "all"
+                            ? ` · ${filterOptions.find((f) => f.toLowerCase() === activeFilter) ?? activeFilter}`
+                            : ""}
+                        </p>
+                        <h2 className="text-2xl font-serif font-normal tracking-tight leading-snug normal-case">
+                          <Link
+                            href={`/${project.id}`}
+                            className="transition-colors duration-300"
+                            style={{
+                              ...titleLinkStyle,
+                              color: "rgb(31, 41, 55)"
+                            }}
                           >
-                            Learn more
-                          </button>
-                        </Link>
+                            {project.shortTitle}
+                          </Link>
+                        </h2>
                       </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 mt-12">
+                      <p className="text-gray-700 font-sans text-base leading-relaxed">{project.description}</p>
+                      <div className="flex flex-wrap gap-x-8 gap-y-2">
                         {project.stats.map((stat, statIndex) => (
-                          <div key={statIndex} className="flex items-start gap-4">
-                            <div className="w-12 h-12 flex items-center justify-center">
-                              <Image
-                                src={stat.icon || "/placeholder.svg"}
-                                alt={`${stat.label} icon`}
-                                width={48}
-                                height={48}
-                              />
-                            </div>
-                            <div>
-                              <div className="text-2xl font-sans font-medium text-gray-800 normal-case">
-                                {stat.value}
-                              </div>
-                              <div className="text-gray-700 text-sm font-sans">{stat.label}</div>
-                            </div>
+                          <div key={statIndex} className="flex items-baseline gap-1.5">
+                            <span className="text-lg font-sans font-medium text-gray-800 normal-case">
+                              {stat.value}
+                            </span>
+                            <span className="text-xs text-gray-600 font-sans">{stat.label}</span>
                           </div>
                         ))}
                       </div>
+                      {/* Password notice lives at the action point, where it becomes relevant */}
+                      <div className="flex items-center gap-3">
+                        <Link
+                          href={`/${project.id}`}
+                          className="font-sans text-sm font-medium hover:opacity-80 transition-opacity"
+                          style={{ color: primaryColor }}
+                        >
+                          Read case study →
+                        </Link>
+                        {isPasswordProtected(project.id) && (
+                          <span className="inline-flex items-center gap-1 font-sans text-xs text-gray-500">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="lucide lucide-lock"
+                            >
+                              <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
+                            Password required
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="flex justify-center lg:justify-end order-1 lg:order-2 transition-all duration-500 ease-in-out project-content">
-                      {project.backgroundImage && project.screenImage ? (
+                    <div className="flex justify-center lg:justify-start order-1 lg:order-1 lg:col-span-3 transition-all duration-500 ease-in-out project-content">
+                      {project.pixelThumb ? (
+                        <Link
+                          href={`/${project.id}`}
+                          className="relative border border-gray-200 overflow-hidden rounded-md block w-full group"
+                        >
+                          <Image
+                            src={project.pixelThumb}
+                            alt={project.imageAlt}
+                            width={1280}
+                            height={960}
+                            className="w-full h-auto transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                          />
+                        </Link>
+                      ) : project.backgroundImage && project.screenImage ? (
                         <CompositeThumbnail
                           backgroundImage={project.backgroundImage}
                           screenImage={project.screenImage}
@@ -1097,106 +1101,142 @@ export default function Home() {
                       )}
                     </div>
                   </>
-                ) : (
-                  // For even-indexed projects (1, 3, etc.), image on left, text on right
-                  <>
-                    <div className="order-1 lg:order-1 flex justify-center lg:justify-start transition-all duration-500 ease-in-out project-content">
-                      {project.backgroundImage && project.screenImage ? (
-                        <CompositeThumbnail
-                          backgroundImage={project.backgroundImage}
-                          screenImage={project.screenImage}
-                          alt={project.imageAlt}
-                          href={`/${project.id}`}
-                        />
-                      ) : (
-                        <Link
-                          href={`/${project.id}`}
-                          className="relative border border-gray-200 overflow-hidden rounded-md bg-white"
-                        >
-                          <Image
-                            src={project.image || "/placeholder.svg"}
+                  </div>
+                </div>
+              ))}
+
+              {/* Compressed cards - the remaining projects for the active filter, concise copy in a 2-up grid */}
+              {otherProjects.length > 0 && (
+                <div
+                  className={`project-section pt-10 mt-10 border-t-2 transition-colors duration-700 ${isFilterChanging ? "mobile-transition-active" : ""}`}
+                  style={{ borderTopColor: getBannerBackgroundColor() }}
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-12">
+                    {otherProjects.map((project) => (
+                      <div key={project.id} id={`${project.id}-section`} className="project-content flex flex-col">
+                        {project.pixelThumb ? (
+                          <Link
+                            href={`/${project.id}`}
+                            className="relative border border-gray-200 overflow-hidden rounded-md block w-full group"
+                          >
+                            <Image
+                              src={project.pixelThumb}
+                              alt={project.imageAlt}
+                              width={1280}
+                              height={960}
+                              className="w-full h-auto transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                            />
+                          </Link>
+                        ) : project.backgroundImage && project.screenImage ? (
+                          <CompositeThumbnail
+                            backgroundImage={project.backgroundImage}
+                            screenImage={project.screenImage}
                             alt={project.imageAlt}
-                            width={600}
-                            height={500}
-                            className="hover:scale-105 transition-all duration-500"
+                            href={`/${project.id}`}
                           />
-                        </Link>
-                      )}
-                    </div>
-
-                    <div className="order-2 lg:order-2 space-y-6 transition-all duration-500 ease-in-out project-content">
-                      {project.company && getCompanyLogo(project.company)}
-                      {isPasswordProtected(project.id) && (
-                        <div className="inline-flex items-center gap-1.5 bg-gray-100 px-2.5 py-1 rounded-full text-xs font-medium text-gray-700 mb-2">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-lock"
+                        ) : (
+                          <Link
+                            href={`/${project.id}`}
+                            className="relative border border-gray-200 overflow-hidden rounded-md bg-white block w-full"
                           >
-                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                          </svg>
-                          Password Protected
-                        </div>
-                      )}
-                      <h2 className="text-4xl font-serif font-normal tracking-tight leading-tight normal-case">
-                        <Link
-                          href={`/${project.id}`}
-                          className="transition-colors duration-300"
-                          style={{
-                            ...titleLinkStyle,
-                            color: "rgb(31, 41, 55)"
-                          }}
-                        >
-                          {project.title}
-                        </Link>
-                      </h2>
-                      <p className="text-gray-800 font-sans text-lg leading-relaxed">{project.description}</p>
-                      <div className="mt-10">
-                        <Link href={`/${project.id}`}>
-                          <button
-                            className="px-6 py-3 text-white rounded-md font-medium hover:opacity-90 transition-colors"
-                            style={{ backgroundColor: primaryColor }}
-                          >
-                            Learn more
-                          </button>
-                        </Link>
-                      </div>
+                            <Image
+                              src={project.image || "/placeholder.svg"}
+                              alt={project.imageAlt}
+                              width={600}
+                              height={500}
+                              className="w-full hover:scale-105 transition-all duration-500"
+                            />
+                          </Link>
+                        )}
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 mt-12">
-                        {project.stats.map((stat, statIndex) => (
-                          <div key={statIndex} className="flex items-start gap-4">
-                            <div className="w-12 h-12 flex items-center justify-center">
-                              <Image
-                                src={stat.icon || "/placeholder.svg"}
-                                alt={`${stat.label} icon`}
-                                width={48}
-                                height={48}
-                              />
-                            </div>
-                            <div>
-                              <div className="text-2xl font-sans font-medium text-gray-800 normal-case">
+                        <h3 className="text-2xl font-serif font-normal tracking-tight leading-snug normal-case mt-6">
+                          <Link
+                            href={`/${project.id}`}
+                            className="transition-colors duration-300"
+                            style={{
+                              ...titleLinkStyle,
+                              color: "rgb(31, 41, 55)"
+                            }}
+                          >
+                            {project.shortTitle}
+                          </Link>
+                        </h3>
+
+                        <p className="text-gray-700 font-sans text-base leading-relaxed mt-2">
+                          {project.shortDescription}
+                        </p>
+
+                        <div className="flex flex-wrap gap-x-8 gap-y-2 mt-4">
+                          {project.stats.map((stat, statIndex) => (
+                            <div key={statIndex} className="flex items-baseline gap-1.5">
+                              <span className="text-lg font-sans font-medium text-gray-800 normal-case">
                                 {stat.value}
-                              </div>
-                              <div className="text-gray-700 text-sm font-sans">{stat.label}</div>
+                              </span>
+                              <span className="text-xs text-gray-600 font-sans">{stat.label}</span>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
+
+                        <div className="mt-4 flex items-center gap-3">
+                          <Link
+                            href={`/${project.id}`}
+                            className="font-sans text-sm font-medium hover:opacity-80 transition-opacity"
+                            style={{ color: primaryColor }}
+                          >
+                            Read case study →
+                          </Link>
+                          {isPasswordProtected(project.id) && (
+                            <span className="inline-flex items-center gap-1 font-sans text-xs text-gray-500">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="lucide lucide-lock"
+                              >
+                                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                              </svg>
+                              Password required
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </>
-                )}
-              </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </section>
-        ))}
+          </div>
+        </div>
+
+        {/* Pixel-art style two-step fade softening the boundary between the floor color and the about band */}
+        <div className="relative z-10" aria-hidden="true">
+          <div
+            className="h-3 w-full transition-colors duration-700"
+            style={{ backgroundColor: getFadeBandColors()[0] }}
+          ></div>
+          <div
+            className="h-3 w-full transition-colors duration-700"
+            style={{ backgroundColor: getFadeBandColors()[1] }}
+          ></div>
+        </div>
+
+        {/* About me - sits on the hero's top color, which carries through to the footer below */}
+        <section
+          id="about-section"
+          className="relative z-10 transition-colors duration-700"
+          style={{ backgroundColor: getAboutBackgroundColor() }}
+        >
+          <div className="max-w-7xl mx-auto px-6 py-16">
+            <AboutMe />
+          </div>
+        </section>
       </div>
     </main>
   )

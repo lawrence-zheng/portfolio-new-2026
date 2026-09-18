@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script>
+  // Opt into cross-document view transitions ONLY for in-app link navigations.
+  // Programmatic reloads (preview tooling) get no transition, so the browser never
+  // creates a skippable transition whose promise would reject on the console.
+  (function () {
+    try {
+      if (sessionStorage.getItem('vtNav') === '1') {
+        sessionStorage.removeItem('vtNav');
+        document.write('<style>@view-transition { navigation: auto; }</style>');
+      }
+    } catch (_) {}
+    document.addEventListener('click', function (ev) {
+      var t = ev.target;
+      var a = t && t.closest ? t.closest('a[href]') : null;
+      if (a && /\.dc\.html(\?.*)?$/i.test(a.getAttribute('href') || '')) {
+        try { sessionStorage.setItem('vtNav', '1'); } catch (_) {}
+        var st = document.createElement('style');
+        st.textContent = '@view-transition { navigation: auto; }';
+        document.head.appendChild(st);
+      }
+    }, true);
+    window.addEventListener('pageswap', function (e) {
+      if (e.viewTransition) { e.viewTransition.finished.catch(function () {}); }
+    });
+    window.addEventListener('pagereveal', function (e) {
+      if (e.viewTransition) {
+        e.viewTransition.ready.catch(function () {});
+        e.viewTransition.finished.catch(function () {});
+      }
+    });
+    window.addEventListener('unhandledrejection', function (e) {
+      var m = String((e.reason && e.reason.message) || e.reason);
+      if (m.indexOf('skipped') !== -1) e.preventDefault();
+    });
+    // Floating tooltip for .icon-tip (eye icons) — fixed positioning escapes the
+    // cards' overflow clipping; includes a caret pointing back at the icon.
+    (function () {
+      var tipEl = null;
+      function hide() { if (tipEl) { tipEl.remove(); tipEl = null; } }
+      document.addEventListener('mouseover', function (ev) {
+        var t = ev.target && ev.target.closest ? ev.target.closest('.icon-tip') : null;
+        if (!t) { hide(); return; }
+        if (tipEl && tipEl._for === t) return;
+        hide();
+        var text = t.getAttribute('data-tip');
+        if (!text) return;
+        var r = t.getBoundingClientRect();
+        tipEl = document.createElement('div');
+        tipEl._for = t;
+        tipEl.textContent = text;
+        tipEl.style.cssText = 'position:fixed;z-index:999;background:#1c2b36;color:#ffffff;font:500 12px/1.4 \'IBM Plex Sans\',sans-serif;padding:6px 10px;border-radius:7px;box-shadow:0 4px 14px rgba(16,42,67,0.28);pointer-events:none;white-space:nowrap;animation:fadeIn 0.12s ease;';
+        var arrow = document.createElement('span');
+        arrow.style.cssText = 'position:absolute;bottom:-4px;width:8px;height:8px;background:#1c2b36;transform:rotate(45deg);border-radius:1px;';
+        tipEl.appendChild(arrow);
+        document.body.appendChild(tipEl);
+        var w = tipEl.offsetWidth;
+        var cx = r.left + r.width / 2;
+        var left = Math.max(6, Math.min(cx - w / 2, window.innerWidth - w - 6));
+        tipEl.style.left = Math.round(left) + 'px';
+        tipEl.style.top = Math.round(r.top - tipEl.offsetHeight - 8) + 'px';
+        arrow.style.left = Math.round(cx - left - 4) + 'px';
+      }, true);
+      document.addEventListener('scroll', hide, true);
+    })();
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Serif:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #eef1f4; }
+  * { box-sizing: border-box; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: none;} }
+  @keyframes pageIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none;} }
+  /* Cross-document view transitions (opt-in injected by head script on link clicks) */
+  header { view-transition-name: app-header; }
+  main { view-transition-name: page-main; }
+  ::view-transition-old(page-main) { animation-duration: 0.22s; }
+  ::view-transition-new(page-main) { animation-duration: 0.22s; }
+  @keyframes checkDraw { from { stroke-dashoffset: 22; } to { stroke-dashoffset: 0; } }
+  @keyframes btnPop { 0% { transform: scale(1); } 40% { transform: scale(1.05); } 100% { transform: scale(1); } }
+  @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes statusInA { 0% { opacity: 0; transform: translateY(-4px); } 100% { opacity: 1; transform: none; } }
+  @keyframes statusInB { 0% { opacity: 0; transform: translateY(-4px); } 100% { opacity: 1; transform: none; } }
+  @keyframes panelInA { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: none;} }
+  @keyframes panelInB { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: none;} }
+  @keyframes fadeSwapA { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes fadeSwapB { from { opacity: 0; } to { opacity: 1; } }
+</style>
+</helmet>
+
+<div data-screen-label="HCC Review" style="min-width: 1200px; min-height: 100vh; background: #eef1f4; font-family: 'IBM Plex Sans', sans-serif; color: #1c2b36; display: flex; flex-direction: column;">
+
+  <!-- ===================== Patient header ===================== -->
+  <header style="background: #ffffff; border-bottom: 1px solid #e2e8ee; padding: 0 28px; height: 76px; display: flex; align-items: center; gap: 20px; flex-shrink: 0; position: relative; z-index: 80;">
+    <a href="HCC Worklist Modernized.dc.html" title="Back to worklist" style="width: 36px; height: 36px; border-radius: 10px; border: 1px solid #dde4ea; background: #ffffff; color: #52616d; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; transition: background 0.15s, border-color 0.15s, transform 0.15s;" style-hover="background: #f2f6f9; border-color: #c4cfd8; transform: translateX(-2px);">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </a>
+
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <h1 style="margin: 0; font-size: 20px; font-weight: 600; line-height: 1;">{{ patientName }}</h1>
+        <div style="display: inline-flex; align-items: center; gap: 6px; animation: {{ statusAnim }};">
+          <span style="width: 7px; height: 7px; border-radius: 50%; background: {{ statusDot }}; transition: background 0.3s;"></span>
+          <span style="font-size: 13px; color: #6b7883; font-weight: 500;">{{ statusText }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="width: 1px; height: 40px; background: #e6ebf0;"></div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.09em; color: #93a1ac; text-transform: uppercase;">Patient details</div>
+      <div style="display: flex; align-items: center; gap: 24px;">
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 12px; color: #8a97a2;">MRN</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: #2c3b46;">
+            ••••••••
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="color: #9aa7b1; cursor: pointer; transition: color 0.15s, transform 0.15s;" style-hover="color: #1878b9; transform: scale(1.18);"><rect x="5" y="5" width="8" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"></rect><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2H4.5A1.5 1.5 0 0 0 3 3.5v8A1.5 1.5 0 0 0 4.5 13H5" stroke="currentColor" stroke-width="1.4"></path></svg>
+          </span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 12px; color: #8a97a2;">Date of birth</span>
+          <span style="font-size: 14px; font-weight: 600; color: #2c3b46;">{{ patientDob }}</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 12px; color: #8a97a2;">Gender</span>
+          <span style="font-size: 14px; font-weight: 600; color: #2c3b46;">{{ patientGender }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="width: 1px; height: 40px; background: #e6ebf0;"></div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.09em; color: #93a1ac; text-transform: uppercase;">Next visit details</div>
+      <div style="display: flex; align-items: center; gap: 24px;">
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 12px; color: #8a97a2;">Provider</span>
+          <span style="font-size: 14px; font-weight: 600; color: #2c3b46;">{{ providerName }}</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 12px; color: #8a97a2;">Visit date</span>
+          <span style="font-size: 14px; font-weight: 600; color: #2c3b46;">{{ visitDate }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex: 1;"></div>
+
+    <span style="position: relative; display: inline-block;">
+      <button onClick="{{ completeReview }}" style="display: inline-flex; align-items: center; gap: 8px; background: {{ reviewBtnBg }}; color: #ffffff; border: none; border-radius: 10px; padding: 11px 20px 11px 16px; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: {{ reviewBtnCursor }}; box-shadow: 0 1px 2px rgba(16,42,67,0.18); animation: {{ reviewBtnAnim }}; transition: background 0.25s, box-shadow 0.15s, transform 0.15s;" style-hover="background: {{ reviewBtnHover }}; box-shadow: 0 3px 8px rgba(16,42,67,0.28); transform: translateY(-1px);">
+        <sc-if value="{{ reviewConfirming }}" hint-placeholder-val="{{ false }}">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12 13 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="22" stroke-dashoffset="22" style="animation: checkDraw 0.45s ease 0.1s forwards;"></path></svg>
+        </sc-if>
+        <sc-if value="{{ reviewNotConfirming }}" hint-placeholder-val="{{ true }}">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12 13 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </sc-if>
+        {{ reviewBtnLabel }}
+      </button>
+      <sc-if value="{{ showReviewDialog }}" hint-placeholder-val="{{ false }}">
+        <span style="position: absolute; top: calc(100% + 10px); right: 0; z-index: 60; width: 330px; background: #ffffff; border: 1px solid #dde4ea; border-radius: 14px; box-shadow: 0 10px 30px rgba(16,42,67,0.18); padding: 16px; display: flex; flex-direction: column; gap: 12px; animation: fadeIn 0.18s ease; text-align: left;"><span style="position: absolute; top: -7px; right: 72px; width: 13px; height: 13px; background: #ffffff; border-left: 1px solid #dde4ea; border-top: 1px solid #dde4ea; transform: rotate(45deg); border-top-left-radius: 3px;"></span>
+          <span style="display: flex; flex-direction: column; gap: 3px;">
+            <span style="font-size: 14px; font-weight: 600; color: #1c2b36;">Complete review</span>
+            <span style="font-size: 12px; color: #8a97a2; line-height: 1.4;">This patient will be submitted for provider approval.</span>
+          </span>
+          <textarea value="{{ reviewComment }}" onChange="{{ onCommentInput }}" placeholder="Add a comment (optional)" rows="3" style="width: 100%; resize: vertical; border: 1px solid #c9d3db; border-radius: 10px; padding: 10px 12px; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; color: #2c3b46; line-height: 1.45; outline: none; transition: border-color 0.15s, box-shadow 0.15s;" style-focus="border-color: #7fb4d9; box-shadow: 0 0 0 3px rgba(24,120,185,0.12);"></textarea>
+          <span style="display: flex; justify-content: flex-end; gap: 8px;">
+            <button onClick="{{ cancelReviewDialog }}" style="background: #ffffff; color: #2c3b46; border: 1px solid #c9d3db; border-radius: 8px; padding: 7px 14px; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s;" style-hover="background: #f2f6f9;">Cancel</button>
+            <button onClick="{{ submitReview }}" style="background: #1878b9; color: #ffffff; border: none; border-radius: 8px; padding: 7px 16px; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s;" style-hover="background: #136499;">Submit review</button>
+          </span>
+        </span>
+      </sc-if>
+    </span>
+  </header>
+
+  <!-- ===================== Tabs ===================== -->
+  <nav style="background: #ffffff; border-bottom: 1px solid #e2e8ee; padding: 0 28px; display: flex; align-items: flex-end; gap: 4px; flex-shrink: 0;">
+    <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="5">
+      <button onClick="{{ tab.select }}" style="display: inline-flex; align-items: center; gap: 7px; background: transparent; border: none; border-bottom: 2.5px solid {{ tab.underline }}; color: {{ tab.color }}; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: {{ tab.weight }}; padding: 13px 16px 11px; cursor: pointer; border-radius: 9px 9px 0 0; transition: color 0.15s, background 0.15s;" style-hover="color: #1878b9; background: #f5fafd;">
+        {{ tab.label }}
+        <sc-if value="{{ tab.badge }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size: 12px; font-weight: 700; color: {{ tab.badgeColor }}; background: {{ tab.badgeBg }}; border-radius: 9px; padding: 1px 7px; line-height: 1.5;">{{ tab.count }}</span>
+        </sc-if>
+      </button>
+    </sc-for>
+  </nav>
+
+  <!-- ===================== Content ===================== -->
+  <main style="flex: 1; padding: 20px 28px 28px; display: flex; flex-direction: column; gap: 18px;">
+
+    <!-- Review submitted confirmation (replaces the AI banner once review is complete) -->
+    <sc-if value="{{ reviewDone }}" hint-placeholder-val="{{ false }}">
+    <section style="background: #eef9f2; border: 1px solid #c4e4d0; border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; animation: fadeIn 0.3s ease;">
+      <span style="width: 34px; height: 34px; border-radius: 50%; background: #1e7a43; color: #ffffff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12 13 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="22" stroke-dashoffset="22" style="animation: checkDraw 0.4s ease 0.35s forwards;"></path></svg>
+      </span>
+      <span style="display: flex; flex-direction: column; gap: 3px; font-size: 14px; color: #22452f; line-height: 1.4;">
+        <span>This patient was reviewed and submitted for provider approval by <strong>Lawrence Zheng</strong> on {{ reviewDate }}.</span>
+        <sc-if value="{{ hasReviewComment }}" hint-placeholder-val="{{ false }}"><span style="color: #4a6b54;">“{{ submittedComment }}”</span></sc-if>
+      </span>
+      <span style="flex: 1;"></span>
+      <button onClick="{{ undoReview }}" style="background: none; border: none; padding: 0; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; color: #1878B9; text-decoration: underline; cursor: pointer; white-space: nowrap; transition: color 0.15s" style-hover="color: #14522d;">Undo</button>
+    </section>
+    </sc-if>
+
+    <!-- AI summary banner -->
+    <sc-if value="{{ showAiBannerNow }}" hint-placeholder-val="{{ true }}">
+    <section style="background: #f2f9fe; border: 1px solid #cbe5f6; border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; animation: fadeIn 0.3s ease;">
+      <div style="width: 38px; height: 38px; border-radius: 12px; background: #1878b9; color: #ffffff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5 1.5-4z" fill="currentColor"></path><path d="M13 10.5l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6.6-1.4z" fill="currentColor"></path></svg>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
+        <div style="font-size: 14px; color: #22384a; line-height: 1.4;">M*Modal AI found <strong>{{ oppCount }} HCC improvement opportunities</strong>, which could <a href="#" style="color: #1878b9; font-weight: 600; text-decoration: none; transition: color 0.15s;" style-hover="color: #136499; text-decoration: underline;">potentially increase RAF by {{ rafPct }}</a>. Please review for accuracy and completeness.</div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="display: inline-flex; align-items: baseline; gap: 7px; background: #ffffff; border: 1px solid #d7e6f1; border-radius: 8px; padding: 5px 12px;">
+            <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #7d8d99;">Current RAF</span>
+            <span style="font-size: 16px; font-weight: 700; color: #2c3b46;">{{ curRaf }}</span>
+          </span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="color: #7fa8c4;"><path d="M2 8h11M9.5 4L13.5 8l-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span style="display: inline-flex; align-items: baseline; gap: 7px; background: #eaf6ef; border: 1px solid #c4e4d0; border-radius: 8px; padding: 5px 12px;">
+            <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #48815e;">Potential RAF</span>
+            <span style="font-size: 16px; font-weight: 700; color: #1e7a43;">{{ potRaf }}</span>
+          </span>
+          <span style="flex: 1;"></span>
+          <span style="font-size: 12px; color: #8ba0af; white-space: nowrap;">Processed with M*Modal Catalyst v1.396, {{ processedStamp }}</span>
+        </div>
+      </div>
+    </section>
+    </sc-if>
+
+    <!-- Two-column workspace -->
+    <div style="display: grid; grid-template-columns: 400px 1fr; gap: 18px; align-items: stretch;">
+
+      <!-- ============ Left: Improvement opportunities ============ -->
+      <section style="background: #ffffff; border: 1px solid #e2e8ee; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(16,42,67,0.05); padding-bottom: 4px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 18px 12px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600; color: #1c2b36;">Improvement opportunities</h2>
+          <button title="Add opportunity" style="width: 30px; height: 30px; border-radius: 8px; border: 1px solid #dde4ea; background: #ffffff; color: #52616d; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s, border-color 0.15s;" style-hover="background: #e3f0f9; border-color: #7fb4d9; color: #1878b9;">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </button>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 18px 12px; border-bottom: 1px solid #eef2f5;">
+          <div style="display: flex; align-items: center; gap: 7px; font-size: 14px;">
+            <span style="color: #6b7883;">Show:</span>
+            <span style="position: relative; display: inline-block;">
+              <button onClick="{{ toggleModelMenu }}" style="display: inline-flex; align-items: center; justify-content: space-between; gap: 18px; background: #ffffff; border: 1px solid #c9d3db; border-radius: 8px; padding: 5px 10px; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 500; color: #2c3b46; cursor: pointer; box-shadow: 0 1px 1px rgba(16,42,67,0.05); transition: border-color 0.15s, box-shadow 0.15s;" style-hover="border-color: #9fb2c0; box-shadow: 0 1px 3px rgba(16,42,67,0.1);">
+                {{ modelLabel }}
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" style="color: #6b7883; transform: rotate({{ menuChev }}); transition: transform 0.2s;"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </button>
+              <sc-if value="{{ showModelMenu }}" hint-placeholder-val="{{ false }}">
+                <span style="position: absolute; top: calc(100% + 4px); left: 0; z-index: 20; min-width: 100%; background: #ffffff; border: 1px solid #dde4ea; border-radius: 8px; box-shadow: 0 4px 14px rgba(16,42,67,0.14); padding: 4px; display: flex; flex-direction: column; animation: fadeIn 0.15s ease;">
+                  <sc-for list="{{ modelOptions }}" as="opt" hint-placeholder-count="2">
+                    <button onClick="{{ opt.select }}" style="display: flex; align-items: center; gap: 8px; background: {{ opt.bg }}; border: none; border-radius: 6px; padding: 6px 10px; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: {{ opt.weight }}; color: #2c3b46; cursor: pointer; text-align: left; white-space: nowrap; transition: background 0.12s;" style-hover="background: #eef6fc;">
+                      <span style="width: 13px; display: flex; color: #1878b9;">
+                        <sc-if value="{{ opt.active }}" hint-placeholder-val="{{ false }}">
+                          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12 13 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        </sc-if>
+                      </span>
+                      {{ opt.label }}
+                    </button>
+                  </sc-for>
+                </span>
+              </sc-if>
+            </span>
+          </div>
+          <button onClick="{{ toggleExpandAll }}" style="background: none; border: none; padding: 0; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; color: #1878b9; cursor: pointer; transition: color 0.15s;" style-hover="color: #136499; text-decoration: underline;">{{ expandAllLabel }}</button>
+        </div>
+
+
+        <!-- NEW HCCS -->
+        <h4 style="margin: 0; padding: 14px 18px 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.09em; color: #93a1ac; text-transform: uppercase;">New HCCs</h4>
+
+        <sc-for list="{{ hccGroups }}" as="g" hint-placeholder-count="2">
+        <div style="margin: 0 12px 10px; border: 1px solid {{ g.cardBorder }}; border-radius: 12px; overflow: hidden; box-shadow: {{ g.cardShadow }}; transition: border-color 0.18s, box-shadow 0.18s;" style-hover="border-color: {{ g.cardBorderHover }}; box-shadow: {{ g.cardShadowHover }};">
+          <button onClick="{{ g.toggle }}" style="width: 100%; display: flex; align-items: flex-start; gap: 8px; background: #ffffff; border: none; text-align: left; padding: 12px 14px; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; transition: background 0.15s;" style-hover="background: #f5fafd;">
+            <sc-if value="{{ g.viewed }}" hint-placeholder-val="{{ false }}"><span class="icon-tip" data-tip="{{ g.viewedTip }}" style="flex-shrink: 0; margin-top: 2px; display: inline-flex;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="color: #9aa7b1; display: block;"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.3"></path><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"></circle></svg></span></sc-if><sc-if value="{{ g.notViewed }}" hint-placeholder-val="{{ true }}"><span style="width: 15px; flex-shrink: 0;"></span></sc-if>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                <span style="font-size: 14px; font-weight: 700; color: #1c2b36; animation: {{ groupAnim }};">{{ g.name }}</span>
+                <span style="flex: 1;"></span>
+                <span style="font-size: 13px; font-weight: 700; color: #1e7a43; background: #eaf6ef; border-radius: 8px; padding: 2px 9px; animation: {{ groupAnim }};">{{ g.raf }}</span>
+              </div>
+              <div style="font-size: 14px; color: #3d4d59; line-height: 1.35; animation: {{ groupAnim }};">{{ g.desc }}</div>
+              <div style="display: flex; align-items: center; gap: 6px; width: 100%;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ g.dot }};"></span>
+                <span style="font-size: 12px; color: #8a97a2;">{{ g.status }}</span>
+                <span style="flex: 1;"></span>
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="color: #9aa7b1; transform: rotate({{ g.chev }}); transition: transform 0.32s cubic-bezier(0.2, 0, 0, 1);"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </div>
+            </div>
+          </button>
+
+          <div style="display: grid; grid-template-rows: {{ g.rows }}; transition: grid-template-rows 0.32s cubic-bezier(0.2, 0, 0, 1);">
+          <div style="overflow: hidden; min-height: 0;">
+          <div style="border-top: 1px solid #eef2f5; background: #fbfdfe;">
+            <sc-for list="{{ g.codes }}" as="code" hint-placeholder-count="2">
+              <button onClick="{{ code.select }}" style="width: 100%; display: flex; align-items: center; gap: 10px; background: {{ code.bg }}; border: none; border-left: 3px solid {{ code.rail }}; text-align: left; padding: 10px 14px 10px 12px; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; transition: background 0.15s;" style-hover="background: #eef6fc;">
+                <span style="width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <sc-if value="{{ code.bell }}" hint-placeholder-val="{{ false }}">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="color: #1878b9;"><path d="M8 2a4 4 0 0 0-4 4v3l-1.2 2h10.4L12 9V6a4 4 0 0 0-4-4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path><path d="M6.7 13.5a1.4 1.4 0 0 0 2.6 0" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>
+                  </sc-if>
+                </span>
+                <span style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
+                  <span style="font-size: 14px; font-weight: 700; color: #1c2b36;">{{ code.code }}</span>
+                  <span style="font-size: 13px; color: #5a6a76; line-height: 1.3;">{{ code.label }}</span>
+                </span>
+                <span style="display: inline-flex; align-items: center;">
+                  <span title="{{ code.pyTitle }}" style="position: relative; width: 40px; height: 28px; display: block; flex-shrink: 0;">
+                    <svg width="40" height="28" viewBox="0 0 40 28" style="position: absolute; inset: 0; display: block;"><path d="M0.6 0.6L31.6 0.6L39.4 14L31.6 27.4L0.6 27.4L8.4 14Z" fill="{{ code.pyFill }}" stroke="{{ code.pyRing }}" stroke-width="1.2" stroke-linejoin="round"></path></svg>
+                    <span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding-left: 3px; color: {{ code.pyIcon }};">
+                      <sc-if value="{{ code.pastYear }}" hint-placeholder-val="{{ true }}">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 8a5.5 5.5 0 1 1 1.6 3.9M2.5 8V5m0 3h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 5.5V8l1.8 1.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+                      </sc-if>
+                      <sc-if value="{{ code.noPastYear }}" hint-placeholder-val="{{ false }}">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 8a5.5 5.5 0 1 1 1.6 3.9M2.5 8V5m0 3h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 5.5V8l1.8 1.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><path d="M2.5 2.5l11 11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+                      </sc-if>
+                    </span>
+                  </span>
+                  <span title="{{ code.cyTitle }}" style="position: relative; width: 40px; height: 28px; display: block; flex-shrink: 0; margin-left: -9px;">
+                    <svg width="40" height="28" viewBox="0 0 40 28" style="position: absolute; inset: 0; display: block;"><path d="M0.6 0.6L31.6 0.6L39.4 14L31.6 27.4L0.6 27.4L8.4 14Z" fill="{{ code.cyFill }}" stroke="{{ code.cyRing }}" stroke-width="1.2" stroke-linejoin="round"></path></svg>
+                    <span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding-left: 3px; color: {{ code.cyIcon }};">
+                      <sc-if value="{{ code.currentYear }}" hint-placeholder-val="{{ true }}">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 2h5l3 3v9H4V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path><path d="M6 8h4M6 10.5h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+                      </sc-if>
+                      <sc-if value="{{ code.noCurrentYear }}" hint-placeholder-val="{{ false }}">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 2h5l3 3v9H4V2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path><path d="M2.5 2.5l11 11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+                      </sc-if>
+                    </span>
+                  </span>
+                  <span title="{{ code.billTitle }}" style="position: relative; width: 40px; height: 28px; display: block; flex-shrink: 0; margin-left: -9px;">
+                    <svg width="40" height="28" viewBox="0 0 40 28" style="position: absolute; inset: 0; display: block;"><path d="M0.6 0.6L31.6 0.6L39.4 14L31.6 27.4L0.6 27.4L8.4 14Z" fill="{{ code.billFill }}" stroke="{{ code.billRing }}" stroke-width="1.2" stroke-linejoin="round"></path></svg>
+                    <span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding-left: 3px; color: {{ code.billIcon }};">
+                      <sc-if value="{{ code.billed }}" hint-placeholder-val="{{ false }}">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5v13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><path d="M11 4.6c-.7-.9-1.8-1.4-3-1.4-1.6 0-2.8.9-2.8 2.2 0 2.9 5.7 1.6 5.7 4.6 0 1.4-1.3 2.3-3 2.3-1.3 0-2.5-.5-3.2-1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+                      </sc-if>
+                      <sc-if value="{{ code.notBilled }}" hint-placeholder-val="{{ true }}">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5v13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><path d="M11 4.6c-.7-.9-1.8-1.4-3-1.4-1.6 0-2.8.9-2.8 2.2 0 2.9 5.7 1.6 5.7 4.6 0 1.4-1.3 2.3-3 2.3-1.3 0-2.5-.5-3.2-1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path><path d="M2.5 2.5l11 11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+                      </sc-if>
+                    </span>
+                  </span>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+          </div>
+          </div>
+        </div>
+        </sc-for>
+
+        <!-- INCREASE SPECIFICITY -->
+        <sc-if value="{{ hasSpecs }}" hint-placeholder-val="{{ true }}">
+        <h4 style="margin: 0; padding: 8px 18px 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.09em; color: #93a1ac; text-transform: uppercase;">Increase specificity</h4>
+        </sc-if>
+
+        <sc-for list="{{ specs }}" as="s" hint-placeholder-count="1">
+        <button onClick="{{ s.select }}" style="width: calc(100% - 24px); margin: 0 12px 10px; border: 1px solid {{ s.border }}; background: {{ s.bg }}; border-radius: 12px; padding: 12px 14px; display: flex; align-items: flex-start; gap: 8px; text-align: left; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; transition: background 0.15s, border-color 0.15s, box-shadow 0.18s;" style-hover="border-color: #9fc3dd; box-shadow: 0 1px 4px rgba(24,120,185,0.09);">
+          <sc-if value="{{ s.viewed }}" hint-placeholder-val="{{ false }}"><span class="icon-tip" data-tip="{{ s.viewedTip }}" style="flex-shrink: 0; margin-top: 2px; display: inline-flex;"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="color: #9aa7b1; display: block;"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.3"></path><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"></circle></svg></span></sc-if><sc-if value="{{ s.notViewed }}" hint-placeholder-val="{{ true }}"><span style="width: 15px; flex-shrink: 0;"></span></sc-if>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 14px; font-weight: 700; color: #7d8d99; animation: {{ groupAnim }};">{{ s.from }}</span>
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="color: #9aa7b1;"><path d="M2 8h11M9.5 4L13.5 8l-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <span style="font-size: 14px; font-weight: 700; color: #1c2b36; animation: {{ groupAnim }};">{{ s.to }}</span>
+            <span style="flex: 1;"></span>
+            <span style="font-size: 13px; font-weight: 700; color: #1e7a43; background: #eaf6ef; border-radius: 8px; padding: 2px 9px; animation: {{ groupAnim }};">{{ s.raf }}</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <span style="font-size: 13px; color: #8a97a2; line-height: 1.35;">{{ s.fromDesc }}</span>
+              <span style="display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ s.fromDot }};"></span>
+                <span style="font-size: 12px; color: #8a97a2;">{{ s.fromStatus }}</span>
+              </span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <span style="font-size: 13px; color: #3d4d59; line-height: 1.35;">{{ s.toDesc }}</span>
+              <span style="display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ s.toDot }};"></span>
+                <span style="font-size: 12px; color: #8a97a2;">{{ s.toStatus }}</span>
+              </span>
+            </div>
+          </div>
+          </div>
+        </button>
+        </sc-for>
+      </section>
+
+      <!-- ============ Right: Detail panel ============ -->
+      <section style="background: #ffffff; border: 1px solid #e2e8ee; border-radius: 14px; padding: 20px 24px 24px; box-shadow: 0 1px 3px rgba(16,42,67,0.05);">
+        <div style="display: flex; flex-direction: column; gap: 16px; animation: {{ panelAnim }};">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+            <h2 style="margin: 0; font-size: 20px; font-weight: 600; color: #1c2b36; line-height: 1.2;">{{ detailTitle }}</h2>
+            <div style="font-size: 14px; color: #6b7883; animation: {{ groupAnim }};">{{ detailSub }}</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: #93a1ac; text-transform: uppercase;">Provider notification</span>
+            <button onClick="{{ toggleNotify }}" role="switch" aria-checked="{{ notifyOnStr }}" style="position: relative; width: 58px; height: 28px; border-radius: 14px; border: none; background: {{ toggleBg }}; cursor: pointer; transition: background 0.2s, box-shadow 0.15s; padding: 0;" style-hover="box-shadow: 0 0 0 3px rgba(24,120,185,0.18);">
+              <span style="position: absolute; top: 3px; left: {{ knobLeft }}; width: 22px; height: 22px; border-radius: 50%; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: left 0.2s;"></span>
+              <span style="position: absolute; top: 50%; transform: translateY(-50%); left: {{ labelLeft }}; font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 0.05em;">{{ toggleLabel }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Status callouts -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <sc-for list="{{ callouts }}" as="c" hint-placeholder-count="2">
+          <div style="display: flex; align-items: center; gap: 12px; background: {{ c.bg }}; border: 1px solid {{ c.border }}; border-radius: 10px; padding: 10px 14px;">
+            <span style="color: {{ c.iconColor }}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <sc-if value="{{ c.isClock }}" hint-placeholder-val="{{ true }}">
+                <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M2.5 8a5.5 5.5 0 1 1 1.6 3.9M2.5 8V5m0 3h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 5.5V8l1.8 1.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>
+              </sc-if>
+              <sc-if value="{{ c.isDoc }}" hint-placeholder-val="{{ false }}">
+                <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M4 2h5l3 3v9H4V2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path><path d="M6 8h4M6 10.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>
+              </sc-if>
+              <sc-if value="{{ c.isDocSlash }}" hint-placeholder-val="{{ false }}">
+                <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M4 2h5l3 3v9H4V2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path><path d="M2.5 2.5l11 11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>
+              </sc-if>
+              <sc-if value="{{ c.isBill }}" hint-placeholder-val="{{ false }}">
+                <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M8 1.5v13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path><path d="M11 4.6c-.7-.9-1.8-1.4-3-1.4-1.6 0-2.8.9-2.8 2.2 0 2.9 5.7 1.6 5.7 4.6 0 1.4-1.3 2.3-3 2.3-1.3 0-2.5-.5-3.2-1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>
+              </sc-if>
+              <sc-if value="{{ c.isBillSlash }}" hint-placeholder-val="{{ false }}">
+                <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M8 1.5v13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path><path d="M11 4.6c-.7-.9-1.8-1.4-3-1.4-1.6 0-2.8.9-2.8 2.2 0 2.9 5.7 1.6 5.7 4.6 0 1.4-1.3 2.3-3 2.3-1.3 0-2.5-.5-3.2-1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path><path d="M2.5 2.5l11 11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path></svg>
+              </sc-if>
+              <sc-if value="{{ c.isCheck }}" hint-placeholder-val="{{ false }}">
+                <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12 13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </sc-if>
+            </span>
+            <span style="font-size: 14px; color: #3d4d59; flex: 1;">{{ c.text }}</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="color: #8a97a2; cursor: pointer; transition: color 0.15s;" style-hover="color: #1878b9;"><path d="M6 3h7v7M13 3L4 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </div>
+          </sc-for>
+        </div>
+
+        <!-- Evidence cards -->
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
+          <h3 style="margin: 0; font-size: 14px; font-weight: 600; color: #2c3b46;">Evidence identified by M*Modal AI for 2022:</h3>
+          <sc-for list="{{ evidence }}" as="ev" hint-placeholder-count="4">
+            <div style="border: 1px solid #e6ebf0; border-radius: 12px; padding: 14px 16px; display: flex; gap: 8px; background: #ffffff; transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;" style-hover="border-color: #cbe0ef; box-shadow: 0 2px 8px rgba(24,120,185,0.1); transform: translateY(-1px);">
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 9px;">
+                <div style="font-size: 15px; line-height: 1.65; font-family: 'IBM Plex Serif', Georgia, serif;">
+                  <sc-for list="{{ ev.segs }}" as="seg" hint-placeholder-count="3"><span style="color: {{ seg.color }}; background: {{ seg.bg }}; padding: {{ seg.pad }}; border-radius: {{ seg.rad }}; box-decoration-break: clone; -webkit-box-decoration-break: clone;">{{ seg.text }}</span></sc-for>
+                </div>
+                <div style="display: flex; align-items: center; gap: 7px;">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="color: #9aa7b1; flex-shrink: 0;"><path d="M4 1.5h5.5L13 5v9.5H4V1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path><path d="M9.5 1.5V5H13" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"></path></svg>
+                  <span style="font-size: 12px; color: #8a97a2;">{{ ev.source }}</span>
+                  <span style="width: 3px; height: 3px; border-radius: 50%; background: #c2ccd4;"></span>
+                  <span style="font-size: 12px; color: #8a97a2;">{{ ev.date }}</span>
+                </div>
+              </div>
+              <button title="More options" style="width: 28px; height: 28px; border-radius: 8px; border: none; background: transparent; color: #8a97a2; display: flex; align-items: center; justify-content: center; cursor: pointer; align-self: flex-start; margin: -4px -9px 0 0; transition: background 0.15s, color 0.15s;" style-hover="background: #f2f6f9; color: #52616d;">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.4"></circle><circle cx="8" cy="8" r="1.4"></circle><circle cx="8" cy="13" r="1.4"></circle></svg>
+              </button>
+            </div>
+          </sc-for>
+        </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ===================== Sticky patient pagination ===================== -->
+  <div style="position: sticky; bottom: 16px; align-self: center; z-index: 40; display: flex; align-items: center; gap: 8px; background: #ffffff; border: 1px solid #dde4ea; border-radius: 999px; padding: 6px; box-shadow: 0 6px 20px rgba(16,42,67,0.16); margin: 4px 0 16px;">
+    <button onClick="{{ prevPatient }}" title="Previous patient" style="width: 34px; height: 34px; border-radius: 50%; border: none; background: transparent; color: {{ prevColor }}; display: flex; align-items: center; justify-content: center; cursor: {{ prevCursor }}; transition: background 0.15s, color 0.15s;" style-hover="background: {{ prevHoverBg }};">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </button>
+    <span style="font-size: 13px; font-weight: 600; color: #3d4d59; padding: 0 6px; white-space: nowrap;">Reviewing {{ patientIndex }} of {{ patientTotal }} patients</span>
+    <button onClick="{{ nextPatient }}" title="Next patient" style="width: 34px; height: 34px; border-radius: 50%; border: none; background: transparent; color: {{ nextColor }}; display: flex; align-items: center; justify-content: center; cursor: {{ nextCursor }}; transition: background 0.15s, color 0.15s;" style-hover="background: {{ nextHoverBg }};">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;showAiBanner&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Content&quot; },
+  &quot;evidenceCount&quot;: { &quot;editor&quot;: &quot;range&quot;, &quot;default&quot;: 4, &quot;min&quot;: 2, &quot;max&quot;: 6, &quot;step&quot;: 1, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Content&quot; }
+}">
+class Component extends DCLogic {
+  static DEFAULTS = [
+    { code: 'I48.91', open: [false, true] },
+    { code: 'E11.42', open: [true, false, false] },
+    { code: 'I50.32', open: [true] },
+    { code: 'J44.1', open: [true, false] },
+    { code: 'I48.91', open: [true] }
+  ];
+
+  state = (() => {
+    let idx = 1;
+    try { idx = parseInt(new URLSearchParams(window.location.search).get('patient'), 10) || 1; } catch (_) {}
+    idx = Math.max(1, Math.min(5, idx));
+    const d = Component.DEFAULTS[idx - 1];
+    return {
+      activeTab: 'Opportunities',
+      openGroups: d.open.slice(),
+      selected: d.code,
+      panelFlip: false,
+      notifyOn: true,
+      model: 'CMS',
+      showModelMenu: false,
+      modelFlip: false,
+      reviewState: 'idle',
+      showReviewDialog: false,
+      reviewComment: '',
+      submittedComment: '',
+      patientIndex: idx
+    };
+  })();
+
+  select(key) {
+    if (this.state.selected === key) return;
+    this.setState(s => ({ selected: key, panelFlip: !s.panelFlip }));
+  }
+
+  goToPatient(idx) {
+    const clamped = Math.max(1, Math.min(5, idx));
+    if (clamped === this.state.patientIndex) return;
+    const d = Component.DEFAULTS[clamped - 1];
+    try { history.replaceState(null, '', '?patient=' + clamped); } catch (_) {}
+    this.setState(s => ({
+      patientIndex: clamped,
+      selected: d.code,
+      openGroups: d.open.slice(),
+      activeTab: 'Opportunities',
+      reviewState: 'idle',
+      showReviewDialog: false,
+      reviewComment: '',
+      submittedComment: '',
+      showModelMenu: false,
+      panelFlip: !s.panelFlip,
+      modelFlip: !s.modelFlip
+    }));
+  }
+
+  // All patient data is fictional. HCC groupings and coefficients differ between the
+  // CMS (Medicare) and HHS (commercial ACA) risk models, hence the per-model labels.
+  getPatients() {
+    if (this._patients) return this._patients;
+
+    // Evidence snippet helpers; blue = AI-highlighted spans
+    const t = text => ({ text, color: '#6b7883', bg: 'transparent', pad: '0', rad: '0' });
+    const h = text => ({ text, color: '#1f3d54', bg: '#d7ebfa', pad: '1px 4px', rad: '4px' });
+    const ev = (source, date, segs) => ({ source, date, segs });
+    const TONES = {
+      good: { bg: '#f2faf5', border: '#c9e7d4', iconColor: '#1e7a43' },
+      warn: { bg: '#fdf8ef', border: '#f1e2c2', iconColor: '#b07d1e' }
+    };
+    const co = (tone, icon, text) => ({
+      ...TONES[tone], text,
+      isClock: icon === 'clock', isDoc: icon === 'doc', isDocSlash: icon === 'docSlash',
+      isBill: icon === 'bill', isBillSlash: icon === 'billSlash', isCheck: icon === 'check'
+    });
+
+    const evidenceAF = [
+      ev('Cardiology consult note', '03/02/2022', [t('Patient reports her heart '), h('\u201Cracing and fluttering\u201D on and off for the past three months'), t(', often with fatigue. In-office ECG shows '), h('an irregular heartbeat with no consistent pattern, rate 112'), t('. Started metoprolol 25 mg twice daily to slow the heart rate; recheck in 4 weeks.')]),
+      ev('12-lead ECG report', '03/02/2022', [t('Interpretation: '), h('heartbeat is irregular, with no organized activity from the heart\u2019s upper chambers'), t('. Rate 112. No signs of a heart attack. Similar to the November tracing.')]),
+      ev('Primary care progress note', '02/14/2022', [t('Heart exam: '), h('irregular rhythm heard on exam'), t(', no murmurs. '), h('Continue apixaban (blood thinner) 5 mg twice daily to lower stroke risk'), t('. Patient denies chest pain or dizziness.')]),
+      ev('Medication refill encounter', '01/22/2022', [t('Refill authorized: '), h('apixaban (Eliquis) 5 mg twice daily, prescribed to prevent stroke'), t('. Taking as directed; no bleeding problems reported.')]),
+      ev('Telemetry summary', '11/30/2021', [t('48-hour heart monitor: '), h('irregular rhythm present 87% of the recording'), t(', average rate 96; two brief pauses during sleep. No dangerous rhythms seen.')]),
+      ev('Echocardiogram report', '11/28/2021', [t('Heart ultrasound: '), h('upper-left chamber is moderately enlarged'), t('; pumping function normal (55%). This kind of enlargement often develops when the heart beats irregularly over time.')])
+    ];
+    const evidenceSSS = [
+      ev('Cardiology consult note', '03/02/2022', [t('Patient describes spells of '), h('lightheadedness with a very slow pulse, alternating with sudden racing'), t('. Findings point to '), h('a fault in the heart\u2019s natural pacemaker'), t('. Discussed a pacemaker if episodes continue.')]),
+      ev('Holter monitor report', '02/20/2022', [t('24-hour recording: '), h('heart rate fell to 38 with three pauses longer than 3 seconds'), t(', matching the dizzy spells noted in the patient\u2019s diary.')]),
+      ev('Nursing triage call', '02/08/2022', [t('Patient called reporting '), h('two near-fainting episodes while gardening'), t('; advised to avoid driving until seen by cardiology.')])
+    ];
+    const evidenceDEP = [
+      ev('Primary care progress note', '02/14/2022', [t('Mood screening today: '), h('PHQ-9 score 16 \u2014 moderately severe depression'), t('. '), h('Continue sertraline 100 mg daily'), t('; follow up in 6 weeks.')]),
+      ev('Behavioral health intake', '01/10/2022', [t('Patient reports '), h('low mood, poor sleep, and loss of interest most days'), t(' for the past two months, worse since her husband\u2019s passing.')]),
+      ev('Medication refill encounter', '01/22/2022', [t('Refill authorized: '), h('sertraline (Zoloft) 100 mg daily, prescribed for depression'), t('. Taking as directed; no side effects reported.')])
+    ];
+    const evidenceDM = [
+      ev('Lab results', '02/28/2022', [t('Kidney function panel: '), h('eGFR 52 \u2014 reduced kidney function, second low result in a row'), t('. '), h('Urine albumin elevated'), t(', suggesting early kidney damage.')]),
+      ev('Nephrology consult note', '03/05/2022', [t('Impression: '), h('early chronic kidney disease, most likely caused by longstanding diabetes'), t('. Recommend tighter glucose control and repeat labs in 3 months.')]),
+      ev('Primary care progress note', '02/14/2022', [t('Diabetes review: A1c 8.1. '), h('Discussed the link between blood sugar control and declining kidney numbers'), t('; medication plan updated.')])
+    ];
+
+    this._patients = [
+      // ---------- 1: Smith, Peggy — 2 new HCCs (1 dx + 2 dx) + 1 specificity ----------
+      {
+        name: 'Smith, Peggy', dob: '03/18/1945', gender: 'Female',
+        provider: 'Dr. Philippa Gregory', visitDate: '04/01/2022', reviewDate: '03/08/2022',
+        oppCount: '3', rafPct: '62%', curRaf: '0.545', potRaf: '1.468', stamp: '03/08/2022 06:05:43 PM',
+        tabCounts: { Opportunities: 3, Visits: 2, Documents: 5 },
+        groups: [
+          {
+            models: { CMS: { name: 'HCC 59', raf: '0.353', desc: 'Major depressive, bipolar and paranoid disorders' }, HHS: { name: 'HCC 88', raf: '1.402', desc: 'Major depressive and bipolar disorders' } },
+            status: 'Missing diagnosis code', dot: '#e8a13c',
+            codes: [{ code: 'F33.1', label: 'Major depressive disorder, recurrent', bell: false, pastYear: false, currentYear: true, billed: false }]
+          },
+          {
+            models: { CMS: { name: 'HCC 74', raf: '0.307', desc: 'Specified heart arrhythmias' }, HHS: { name: 'HCC 142', raf: '2.070', desc: 'Specified heart arrhythmias' } },
+            viewedBy: 'Dana Ruiz',
+            status: 'Missing documentation', dot: '#e8a13c',
+            codes: [
+              { code: 'I48.91', label: 'Unspecified atrial fibrilliation', bell: true, pastYear: true, currentYear: false, billed: false },
+              { code: 'I49.5', label: 'Sick sinus syndrome', bell: false, pastYear: true, currentYear: true, billed: false }
+            ]
+          }
+        ],
+        specs: [
+          {
+            code: 'E11.22',
+            models: { CMS: { from: 'HCC 19', to: 'HCC 18', raf: '0.263' }, HHS: { from: 'HCC 21', to: 'HCC 20', raf: '0.914' } },
+            label: 'Diabetes with chronic complications',
+            fromDesc: 'Diabetes without complications', fromStatus: 'Fully captured', fromDot: '#34a55f',
+            toDesc: 'Diabetes with chronic complications', toStatus: 'Missing documentation', toDot: '#e8a13c'
+          }
+        ],
+        defaultCode: 'I48.91',
+        details: {
+          'I48.91': {
+            title: 'Unspecified atrial fibrilliation (I48.91)', groupIdx: 1,
+            callouts: [
+              co('good', 'clock', 'This diagnosis was fully documented and billed in a prior year (2021)'),
+              co('warn', 'docSlash', 'This diagnosis is missing sufficient MEAT documentation for the current year')
+            ],
+            evidence: evidenceAF
+          },
+          'I49.5': {
+            title: 'Sick sinus syndrome (I49.5)', groupIdx: 1,
+            callouts: [
+              co('good', 'doc', 'This diagnosis is documented for the current year (02/20/2022)'),
+              co('warn', 'billSlash', 'This diagnosis has not yet been billed for the current year')
+            ],
+            evidence: evidenceSSS
+          },
+          'F33.1': {
+            title: 'Major depressive disorder, recurrent (F33.1)', groupIdx: 0,
+            callouts: [
+              co('warn', 'docSlash', 'Documentation supports a depression diagnosis, but no diagnosis code has been added to the claim')
+            ],
+            evidence: evidenceDEP
+          },
+          'E11.22': {
+            title: 'Type 2 diabetes with chronic kidney disease (E11.22)', specIdx: 0,
+            callouts: [
+              co('good', 'check', 'Diabetes without complications (HCC 19) is fully captured for the current year'),
+              co('warn', 'docSlash', 'Lab and specialist findings suggest chronic complications \u2014 a more specific diagnosis is supported')
+            ],
+            evidence: evidenceDM
+          }
+        }
+      },
+      // ---------- 2: Roderick, Sanford — 3 new HCCs, no specificity ----------
+      {
+        name: 'Roderick, Sanford', dob: '07/22/1949', gender: 'Male',
+        provider: 'Dr. Cassie Grisson', visitDate: '03/29/2022', reviewDate: '03/15/2022',
+        oppCount: '4', rafPct: '84%', curRaf: '1.104', potRaf: '2.029', stamp: '03/15/2022 07:12:09 AM',
+        tabCounts: { Opportunities: 4, Visits: 3, Documents: 6 },
+        groups: [
+          {
+            models: { CMS: { name: 'HCC 18', raf: '0.302', desc: 'Diabetes with chronic complications' }, HHS: { name: 'HCC 20', raf: '1.951', desc: 'Diabetes with chronic complications' } },
+            status: 'Missing documentation', dot: '#e8a13c',
+            codes: [
+              { code: 'E11.42', label: 'Type 2 diabetes with diabetic polyneuropathy', bell: true, pastYear: true, currentYear: false, billed: false },
+              { code: 'E11.51', label: 'Type 2 diabetes with diabetic peripheral angiopathy', bell: false, pastYear: false, currentYear: true, billed: false }
+            ]
+          },
+          {
+            models: { CMS: { name: 'HCC 111', raf: '0.335', desc: 'Chronic obstructive pulmonary disease' }, HHS: { name: 'HCC 160', raf: '0.847', desc: 'Chronic obstructive pulmonary disease' } },
+            status: 'Not yet billed', dot: '#e8a13c',
+            codes: [{ code: 'J44.9', label: 'Chronic obstructive pulmonary disease, unspecified', bell: false, pastYear: true, currentYear: true, billed: false }]
+          },
+          {
+            models: { CMS: { name: 'HCC 108', raf: '0.288', desc: 'Vascular disease' }, HHS: { name: 'HCC 253', raf: '0.410', desc: 'Vascular disease' } },
+            status: 'Missing diagnosis code', dot: '#e8a13c',
+            codes: [{ code: 'I70.25', label: 'Atherosclerosis of extremities with ulceration', bell: false, pastYear: false, currentYear: true, billed: false }]
+          }
+        ],
+        specs: [],
+        defaultCode: 'E11.42',
+        details: {
+          'E11.42': {
+            title: 'Type 2 diabetes with diabetic polyneuropathy (E11.42)', groupIdx: 0,
+            callouts: [
+              co('good', 'clock', 'This diagnosis was fully documented and billed in a prior year (2021)'),
+              co('warn', 'docSlash', 'This diagnosis is missing sufficient MEAT documentation for the current year')
+            ],
+            evidence: [
+              ev('Podiatry visit note', '03/10/2022', [t('Monofilament exam: '), h('diminished sensation across both forefeet'), t('. '), h('Continue gabapentin 300 mg at bedtime for nerve pain'), t('; nails debrided, skin intact.')]),
+              ev('Nerve conduction study', '01/18/2022', [t('Findings consistent with '), h('moderate sensorimotor polyneuropathy in both lower legs'), t(', a pattern typical of longstanding diabetes.')]),
+              ev('Primary care progress note', '02/22/2022', [t('Reports '), h('numbness and burning in both feet, worse at night'), t('. A1c 8.4; reviewed foot-care precautions.')])
+            ]
+          },
+          'E11.51': {
+            title: 'Type 2 diabetes with diabetic peripheral angiopathy (E11.51)', groupIdx: 0,
+            callouts: [
+              co('good', 'doc', 'This diagnosis is documented for the current year (03/10/2022)'),
+              co('warn', 'billSlash', 'This diagnosis has not yet been billed for the current year')
+            ],
+            evidence: [
+              ev('Ankle-brachial index report', '03/10/2022', [t('ABI 0.78 on the right, 0.81 on the left \u2014 '), h('reduced blood flow to both legs'), t('.')]),
+              ev('Podiatry visit note', '03/10/2022', [t('Feet cool to the touch; '), h('weak pulses at both ankles'), t('. Advised daily skin checks.')])
+            ]
+          },
+          'J44.9': {
+            title: 'Chronic obstructive pulmonary disease, unspecified (J44.9)', groupIdx: 1,
+            callouts: [
+              co('good', 'doc', 'This diagnosis is documented for the current year (02/05/2022)'),
+              co('warn', 'billSlash', 'This diagnosis has not yet been billed for the current year')
+            ],
+            evidence: [
+              ev('Spirometry report', '02/05/2022', [t('FEV1 61% of predicted \u2014 '), h('moderate airflow obstruction that does not fully reverse with an inhaler'), t('.')]),
+              ev('Medication refill encounter', '01/28/2022', [t('Refill authorized: '), h('tiotropium (Spiriva) once daily for COPD'), t('; albuterol as needed. Using correctly.')])
+            ]
+          },
+          'I70.25': {
+            title: 'Atherosclerosis of the extremities with ulceration (I70.25)', groupIdx: 2,
+            callouts: [
+              co('warn', 'docSlash', 'Wound care findings support this diagnosis, but no diagnosis code has been added to the claim')
+            ],
+            evidence: [
+              ev('Wound care note', '03/12/2022', [t('Shallow 1.2 cm ulcer on the left heel, '), h('present for six weeks with poor healing'), t('; dressing changed, offloading boot fitted.')]),
+              ev('Vascular surgery consult', '02/17/2022', [t('Reports '), h('calf pain after walking one block, relieved by rest'), t(' \u2014 a classic poor-circulation symptom. Duplex scan ordered.')])
+            ]
+          }
+        }
+      },
+      // ---------- 3: Hoffman, Patrick — 1 new HCC (2 dx) + 1 specificity ----------
+      {
+        name: 'Hoffman, Patrick', dob: '11/04/1952', gender: 'Male',
+        provider: 'Dr. Kat McCoy', visitDate: '03/22/2022', reviewDate: '03/01/2022',
+        oppCount: '2', rafPct: '59%', curRaf: '1.015', potRaf: '1.609', stamp: '03/01/2022 05:48:21 PM',
+        tabCounts: { Opportunities: 2, Visits: 2, Documents: 4 },
+        groups: [
+          {
+            models: { CMS: { name: 'HCC 85', raf: '0.331', desc: 'Congestive heart failure' }, HHS: { name: 'HCC 130', raf: '2.294', desc: 'Congestive heart failure' } },
+            viewedBy: 'Marcus Webb',
+            status: 'Missing documentation', dot: '#e8a13c',
+            codes: [
+              { code: 'I50.32', label: 'Chronic diastolic (congestive) heart failure', bell: true, pastYear: true, currentYear: false, billed: false },
+              { code: 'I50.9', label: 'Heart failure, unspecified', bell: false, pastYear: true, currentYear: true, billed: true }
+            ]
+          }
+        ],
+        specs: [
+          {
+            code: 'E11.22',
+            models: { CMS: { from: 'HCC 19', to: 'HCC 18', raf: '0.263' }, HHS: { from: 'HCC 21', to: 'HCC 20', raf: '0.914' } },
+            label: 'Diabetes with chronic complications',
+            fromDesc: 'Diabetes without complications', fromStatus: 'Fully captured', fromDot: '#34a55f',
+            toDesc: 'Diabetes with chronic kidney disease', toStatus: 'Missing documentation', toDot: '#e8a13c'
+          }
+        ],
+        defaultCode: 'I50.32',
+        details: {
+          'I50.32': {
+            title: 'Chronic diastolic (congestive) heart failure (I50.32)', groupIdx: 0,
+            callouts: [
+              co('good', 'clock', 'This diagnosis was fully documented and billed in a prior year (2021)'),
+              co('warn', 'docSlash', 'This diagnosis is missing sufficient MEAT documentation for the current year')
+            ],
+            evidence: [
+              ev('Echocardiogram report', '02/25/2022', [t('Heart ultrasound: pumping function preserved (60%), but '), h('the heart muscle relaxes poorly between beats'), t(' \u2014 the pattern behind his fluid buildup.')]),
+              ev('Primary care progress note', '02/11/2022', [t('Reports '), h('ankle swelling and breathlessness after one flight of stairs'), t('. '), h('Furosemide (water pill) increased to 40 mg daily'), t('.')]),
+              ev('Nursing telephone check-in', '01/30/2022', [t('Weight up '), h('4 pounds in five days'), t('; reviewed low-salt diet and daily weights.')])
+            ]
+          },
+          'I50.9': {
+            title: 'Heart failure, unspecified (I50.9)', groupIdx: 0,
+            callouts: [
+              co('good', 'doc', 'This diagnosis is documented for the current year (02/11/2022)'),
+              co('good', 'bill', 'This diagnosis was billed for the current year (02/14/2022)')
+            ],
+            evidence: [
+              ev('Claim summary', '02/14/2022', [t('Office visit billed with '), h('heart failure, unspecified (I50.9)'), t(' \u2014 a more specific code may better reflect severity.')])
+            ]
+          },
+          'E11.22': {
+            title: 'Type 2 diabetes with chronic kidney disease (E11.22)', specIdx: 0,
+            callouts: [
+              co('good', 'check', 'Diabetes without complications is fully captured for the current year'),
+              co('warn', 'docSlash', 'Lab findings suggest kidney involvement \u2014 a more specific diagnosis is supported')
+            ],
+            evidence: [
+              ev('Lab results', '03/01/2022', [t('Kidney function panel: '), h('eGFR 47 \u2014 reduced kidney function, stable across two tests'), t('. '), h('Urine albumin mildly elevated'), t('.')]),
+              ev('Nephrology consult note', '03/09/2022', [t('Impression: '), h('early chronic kidney disease, most likely from longstanding diabetes'), t('. Repeat labs in 3 months.')])
+            ]
+          }
+        }
+      },
+      // ---------- 4: Hopper, Jim — 2 new HCCs + 2 specificity entries ----------
+      {
+        name: 'Hopper, Jim', dob: '02/09/1947', gender: 'Male',
+        provider: 'Dr. Raj Dutta', visitDate: '03/27/2022', reviewDate: '03/13/2022',
+        oppCount: '4', rafPct: '89%', curRaf: '1.008', potRaf: '1.902', stamp: '03/13/2022 09:31:54 AM',
+        tabCounts: { Opportunities: 4, Visits: 4, Documents: 7 },
+        groups: [
+          {
+            models: { CMS: { name: 'HCC 111', raf: '0.335', desc: 'Chronic obstructive pulmonary disease' }, HHS: { name: 'HCC 160', raf: '0.847', desc: 'Chronic obstructive pulmonary disease' } },
+            status: 'Missing documentation', dot: '#e8a13c',
+            codes: [
+              { code: 'J44.1', label: 'COPD with (acute) exacerbation', bell: true, pastYear: true, currentYear: false, billed: false },
+              { code: 'J44.9', label: 'Chronic obstructive pulmonary disease, unspecified', bell: false, pastYear: true, currentYear: true, billed: false }
+            ]
+          },
+          {
+            models: { CMS: { name: 'HCC 59', raf: '0.309', desc: 'Major depressive, bipolar and paranoid disorders' }, HHS: { name: 'HCC 88', raf: '1.402', desc: 'Major depressive and bipolar disorders' } },
+            status: 'Missing diagnosis code', dot: '#e8a13c',
+            codes: [{ code: 'F32.1', label: 'Major depressive disorder, single episode, moderate', bell: false, pastYear: false, currentYear: true, billed: false }]
+          }
+        ],
+        specs: [
+          {
+            code: 'E66.01',
+            models: { CMS: { from: 'No HCC', to: 'HCC 22', raf: '0.250' }, HHS: { from: 'No HCC', to: 'HCC 37', raf: '0.310' } },
+            label: 'Morbid (severe) obesity',
+            fromDesc: 'Obesity, unspecified', fromStatus: 'No risk adjustment', fromDot: '#aeb9c2',
+            toDesc: 'Morbid (severe) obesity', toStatus: 'Missing diagnosis code', toDot: '#e8a13c'
+          },
+          {
+            code: 'E11.40',
+            models: { CMS: { from: 'HCC 19', to: 'HCC 18', raf: '0.263' }, HHS: { from: 'HCC 21', to: 'HCC 20', raf: '0.914' } },
+            label: 'Diabetes with chronic complications',
+            fromDesc: 'Diabetes without complications', fromStatus: 'Fully captured', fromDot: '#34a55f',
+            toDesc: 'Diabetes with neurological complications', toStatus: 'Missing documentation', toDot: '#e8a13c'
+          }
+        ],
+        defaultCode: 'J44.1',
+        details: {
+          'J44.1': {
+            title: 'COPD with (acute) exacerbation (J44.1)', groupIdx: 0,
+            callouts: [
+              co('good', 'clock', 'This diagnosis was fully documented and billed in a prior year (2021)'),
+              co('warn', 'docSlash', 'This diagnosis is missing sufficient MEAT documentation for the current year')
+            ],
+            evidence: [
+              ev('Emergency department note', '12/14/2021', [t('Presented with '), h('worsening shortness of breath and wheeze over three days'), t('; treated with '), h('a steroid burst and azithromycin for a COPD flare'), t('.')]),
+              ev('Pulmonology follow-up', '01/06/2022', [t('Recovering from December flare; '), h('breathing back to baseline'), t('. Flu and pneumonia vaccines updated.')])
+            ]
+          },
+          'J44.9': {
+            title: 'Chronic obstructive pulmonary disease, unspecified (J44.9)', groupIdx: 0,
+            callouts: [
+              co('good', 'doc', 'This diagnosis is documented for the current year (02/09/2022)'),
+              co('warn', 'billSlash', 'This diagnosis has not yet been billed for the current year')
+            ],
+            evidence: [
+              ev('Spirometry report', '02/09/2022', [t('FEV1 54% of predicted \u2014 '), h('moderately severe airflow obstruction'), t('.')]),
+              ev('Medication refill encounter', '02/09/2022', [t('Refills: '), h('tiotropium daily and albuterol as needed for COPD'), t('.')])
+            ]
+          },
+          'F32.1': {
+            title: 'Major depressive disorder, single episode, moderate (F32.1)', groupIdx: 1,
+            callouts: [
+              co('warn', 'docSlash', 'Documentation supports a depression diagnosis, but no diagnosis code has been added to the claim')
+            ],
+            evidence: [
+              ev('Primary care progress note', '02/09/2022', [t('Mood screening: '), h('PHQ-9 score 14 \u2014 moderate depression'), t('. '), h('Started mirtazapine 15 mg at bedtime'), t('.')]),
+              ev('Nursing telephone check-in', '02/23/2022', [t('Sleeping better on new medication; '), h('mood improving but still low most days'), t('.')])
+            ]
+          },
+          'E66.01': {
+            title: 'Morbid (severe) obesity due to excess calories (E66.01)', specIdx: 0,
+            callouts: [
+              co('good', 'doc', 'Obesity is documented for the current year (02/09/2022)'),
+              co('warn', 'docSlash', 'Recorded BMI of 42.7 supports morbid obesity \u2014 a more specific diagnosis is supported')
+            ],
+            evidence: [
+              ev('Vitals record', '02/09/2022', [t('Weight 289 lb, height 5\u20329\u2033 \u2014 '), h('BMI 42.7'), t('.')]),
+              ev('Dietitian referral', '02/09/2022', [t('Referred for '), h('medical weight management'), t('; discussed an activity plan.')])
+            ]
+          },
+          'E11.40': {
+            title: 'Type 2 diabetes with diabetic neuropathy, unspecified (E11.40)', specIdx: 1,
+            callouts: [
+              co('good', 'check', 'Diabetes without complications is fully captured for the current year'),
+              co('warn', 'docSlash', 'Exam findings suggest nerve involvement \u2014 a more specific diagnosis is supported')
+            ],
+            evidence: [
+              ev('Primary care progress note', '03/02/2022', [t('Foot exam: '), h('reduced monofilament sensation in both feet'), t('. A1c 8.2 on metformin.')]),
+              ev('Patient message', '03/04/2022', [t('Reports '), h('occasional tingling in the toes at night'), t('.')])
+            ]
+          }
+        }
+      },
+      // ---------- 5: Nessman, Andrew — 1 new HCC (1 dx) + 1 specificity ----------
+      {
+        name: 'Nessman, Andrew', dob: '09/30/1950', gender: 'Male',
+        provider: 'Dr. Peter Hanson', visitDate: '03/31/2022', reviewDate: '03/15/2022',
+        oppCount: '2', rafPct: '68%', curRaf: '0.837', potRaf: '1.407', stamp: '03/15/2022 04:26:37 PM',
+        tabCounts: { Opportunities: 2, Visits: 2, Documents: 5 },
+        groups: [
+          {
+            models: { CMS: { name: 'HCC 74', raf: '0.307', desc: 'Specified heart arrhythmias' }, HHS: { name: 'HCC 142', raf: '2.070', desc: 'Specified heart arrhythmias' } },
+            status: 'Missing documentation', dot: '#e8a13c',
+            codes: [{ code: 'I48.91', label: 'Unspecified atrial fibrilliation', bell: true, pastYear: true, currentYear: false, billed: false }]
+          }
+        ],
+        specs: [
+          {
+            code: 'E11.40',
+            models: { CMS: { from: 'HCC 19', to: 'HCC 18', raf: '0.263' }, HHS: { from: 'HCC 21', to: 'HCC 20', raf: '0.914' } },
+            label: 'Diabetes with chronic complications',
+            fromDesc: 'Diabetes without complications', fromStatus: 'Fully captured', fromDot: '#34a55f',
+            toDesc: 'Diabetes with neurological complications', toStatus: 'Missing documentation', toDot: '#e8a13c'
+          }
+        ],
+        defaultCode: 'I48.91',
+        details: {
+          'I48.91': {
+            title: 'Unspecified atrial fibrilliation (I48.91)', groupIdx: 0,
+            callouts: [
+              co('good', 'clock', 'This diagnosis was fully documented and billed in a prior year (2021)'),
+              co('warn', 'docSlash', 'This diagnosis is missing sufficient MEAT documentation for the current year')
+            ],
+            evidence: [
+              ev('Cardiology follow-up note', '02/24/2022', [t('Pulse '), h('irregularly irregular at 104'), t('; '), h('continue apixaban 5 mg twice daily to lower stroke risk'), t('.')]),
+              ev('12-lead ECG report', '02/24/2022', [t('Interpretation: '), h('irregular rhythm with no organized upper-chamber activity'), t(', rate 104.')])
+            ]
+          },
+          'E11.40': {
+            title: 'Type 2 diabetes with diabetic neuropathy, unspecified (E11.40)', specIdx: 0,
+            callouts: [
+              co('good', 'check', 'Diabetes without complications is fully captured for the current year'),
+              co('warn', 'docSlash', 'Exam findings suggest nerve involvement \u2014 a more specific diagnosis is supported')
+            ],
+            evidence: [
+              ev('Primary care progress note', '02/18/2022', [t('Foot exam: '), h('reduced monofilament sensation in both feet'), t('. A1c 7.9 on metformin.')]),
+              ev('Patient message', '02/20/2022', [t('Reports '), h('occasional tingling in the toes at night'), t('.')])
+            ]
+          }
+        }
+      }
+    ];
+    return this._patients;
+  }
+
+  renderVals() {
+    const { activeTab, openGroups, selected, panelFlip, notifyOn, model, showModelMenu, modelFlip, patientIndex, reviewState, showReviewDialog, reviewComment, submittedComment } = this.state;
+    const PATIENTS = this.getPatients();
+    const p = PATIENTS[patientIndex - 1];
+
+    const tabs = ['Opportunities', 'Visits', 'Documents', 'Activity', 'Notes'].map(label => {
+      const active = label === activeTab;
+      return {
+        label,
+        badge: p.tabCounts[label] != null,
+        count: p.tabCounts[label],
+        badgeColor: active ? '#1878b9' : '#6b7883',
+        badgeBg: active ? '#e3f0f9' : '#eef1f4',
+        underline: active ? '#1878b9' : 'transparent',
+        color: active ? '#1878b9' : '#5a6a76',
+        weight: active ? 600 : 500,
+        select: label === 'Opportunities' ? () => this.setState({ activeTab: label }) : () => {}
+      };
+    });
+
+    const STEP_COLORS = {
+      py:   { ring: '#c9781d', fill: '#fbeedd', icon: '#955a10' },
+      cy:   { ring: '#7a5fd0', fill: '#ece7fa', icon: '#5b44a8' },
+      bill: { ring: '#1e7a43', fill: '#dcf0e4', icon: '#166536' }
+    };
+    const chip = (done, key, sel) => done
+      ? STEP_COLORS[key]
+      : { ring: sel ? '#b6cbdb' : '#c2ccd4', fill: sel ? '#edf5fb' : '#ffffff', icon: '#a9b6c0' };
+    const mkRow = c => {
+      const sel = c.code === selected;
+      return {
+        ...c,
+        noPastYear: !c.pastYear,
+        noCurrentYear: !c.currentYear,
+        notBilled: !c.billed,
+        pyRing: chip(c.pastYear, 'py', sel).ring, pyFill: chip(c.pastYear, 'py', sel).fill, pyIcon: chip(c.pastYear, 'py', sel).icon,
+        cyRing: chip(c.currentYear, 'cy', sel).ring, cyFill: chip(c.currentYear, 'cy', sel).fill, cyIcon: chip(c.currentYear, 'cy', sel).icon,
+        billRing: chip(c.billed, 'bill', sel).ring, billFill: chip(c.billed, 'bill', sel).fill, billIcon: chip(c.billed, 'bill', sel).icon,
+        pyTitle: c.pastYear ? 'Documented in a prior year' : 'No prior year documentation',
+        cyTitle: c.currentYear ? 'Documented in the current year' : 'No current year documentation',
+        billTitle: c.billed ? 'Billed' : 'Not billed',
+        bg: sel ? '#e9f4fb' : 'transparent',
+        rail: sel ? '#1878b9' : 'transparent',
+        select: () => this.select(c.code)
+      };
+    };
+
+    const hccGroups = p.groups.map((g, i) => {
+      const gm = g.models[model];
+      const open = !!openGroups[i];
+      return {
+        name: gm.name, raf: gm.raf, desc: gm.desc,
+        status: g.status, dot: g.dot,
+        viewed: !!g.viewedBy,
+        notViewed: !g.viewedBy,
+        viewedTip: 'Viewed by ' + (g.viewedBy || ''),
+        codes: g.codes.map(mkRow),
+        rows: open ? '1fr' : '0fr',
+        chev: open ? '180deg' : '0deg',
+        toggle: () => this.setState(s => {
+          const o = s.openGroups.slice();
+          o[i] = !o[i];
+          return { openGroups: o };
+        }),
+        cardBorder: open ? '#cbe0ef' : '#e6ebf0',
+        cardShadow: open ? '0 1px 3px rgba(24,120,185,0.07)' : 'none',
+        cardBorderHover: open ? '#a9cee8' : '#cbd8e2',
+        cardShadowHover: open ? '0 2px 6px rgba(24,120,185,0.12)' : '0 1px 4px rgba(16,42,67,0.07)'
+      };
+    });
+
+    const specs = p.specs.map(s => {
+      const sm = s.models[model];
+      const sel = selected === s.code;
+      return {
+        from: sm.from, to: sm.to, raf: sm.raf,
+        viewed: !!s.viewedBy,
+        notViewed: !s.viewedBy,
+        viewedTip: 'Viewed by ' + (s.viewedBy || ''),
+        fromDesc: s.fromDesc, fromStatus: s.fromStatus, fromDot: s.fromDot,
+        toDesc: s.toDesc, toStatus: s.toStatus, toDot: s.toDot,
+        bg: sel ? '#e9f4fb' : '#ffffff',
+        border: sel ? '#7fb4d9' : '#e6ebf0',
+        select: () => this.select(s.code)
+      };
+    });
+
+    const det = p.details[selected] || p.details[p.defaultCode];
+    let detailSub;
+    if (det.specIdx != null) {
+      const s = p.specs[det.specIdx];
+      const sm = s.models[model];
+      detailSub = sm.from + ' \u2192 ' + sm.to + ': ' + s.label;
+    } else {
+      const gm = p.groups[det.groupIdx].models[model];
+      detailSub = gm.name + ': ' + gm.desc;
+    }
+
+    const count = Math.max(2, Math.min(6, this.props.evidenceCount ?? 4));
+    const allOpen = openGroups.slice(0, p.groups.length).every(Boolean);
+
+    return {
+      tabs,
+      hccGroups,
+      specs,
+      hasSpecs: p.specs.length > 0,
+      showAiBannerNow: (this.props.showAiBanner ?? true) && reviewState !== 'done',
+      evidence: det.evidence.slice(0, count),
+      detailTitle: det.title,
+      detailSub,
+      callouts: det.callouts,
+      patientName: p.name,
+      patientDob: p.dob,
+      patientGender: p.gender,
+      providerName: p.provider,
+      visitDate: p.visitDate,
+      reviewDate: p.reviewDate,
+      oppCount: p.oppCount,
+      rafPct: p.rafPct,
+      curRaf: p.curRaf,
+      potRaf: p.potRaf,
+      processedStamp: p.stamp,
+      patientIndex,
+      patientTotal: 5,
+      prevPatient: () => this.goToPatient(patientIndex - 1),
+      nextPatient: () => this.goToPatient(patientIndex + 1),
+      prevColor: patientIndex === 1 ? '#c6d0d8' : '#52616d',
+      nextColor: patientIndex === 5 ? '#c6d0d8' : '#52616d',
+      prevCursor: patientIndex === 1 ? 'default' : 'pointer',
+      nextCursor: patientIndex === 5 ? 'default' : 'pointer',
+      prevHoverBg: patientIndex === 1 ? 'transparent' : '#f2f6f9',
+      nextHoverBg: patientIndex === 5 ? 'transparent' : '#f2f6f9',
+      panelAnim: (panelFlip ? 'panelInA' : 'panelInB') + ' 0.28s cubic-bezier(0.2, 0, 0, 1) both',
+      groupAnim: (modelFlip ? 'fadeSwapA' : 'fadeSwapB') + ' 0.35s ease both',
+      toggleExpandAll: () => this.setState(s => {
+        const all = s.openGroups.slice(0, p.groups.length).every(Boolean);
+        return { openGroups: p.groups.map(() => !all) };
+      }),
+      expandAllLabel: allOpen ? 'Collapse all' : 'Expand all',
+      modelLabel: model + '-HCCs',
+      showModelMenu,
+      menuChev: showModelMenu ? '180deg' : '0deg',
+      toggleModelMenu: () => this.setState(s => ({ showModelMenu: !s.showModelMenu })),
+      modelOptions: ['CMS', 'HHS'].map(key => ({
+        label: key + '-HCCs',
+        active: key === model,
+        weight: key === model ? 600 : 500,
+        bg: key === model ? '#f2f8fd' : 'transparent',
+        select: () => this.setState(s => key === s.model
+          ? { showModelMenu: false }
+          : { model: key, showModelMenu: false, modelFlip: !s.modelFlip })
+      })),
+      reviewConfirming: reviewState === 'confirming',
+      reviewNotConfirming: reviewState !== 'confirming',
+      reviewDone: reviewState === 'done',
+      reviewBtnBg: reviewState === 'idle' ? '#1878b9' : '#1e7a43',
+      reviewBtnHover: reviewState === 'idle' ? '#136499' : '#1e7a43',
+      reviewBtnCursor: reviewState === 'idle' ? 'pointer' : 'default',
+      reviewBtnLabel: reviewState === 'idle' ? 'Complete review' : 'Review complete',
+      reviewBtnAnim: reviewState === 'confirming' ? 'btnPop 0.35s ease' : 'none',
+      completeReview: () => {
+        if (this.state.reviewState !== 'idle') return;
+        this.setState(s => ({ showReviewDialog: !s.showReviewDialog }));
+      },
+      showReviewDialog,
+      reviewComment,
+      onCommentInput: e => this.setState({ reviewComment: e.target.value }),
+      cancelReviewDialog: () => this.setState({ showReviewDialog: false, reviewComment: '' }),
+      submitReview: () => {
+        this.setState(s => ({ showReviewDialog: false, submittedComment: s.reviewComment.trim(), reviewState: 'confirming' }));
+        setTimeout(() => this.setState({ reviewState: 'done' }), 1200);
+      },
+      hasReviewComment: !!submittedComment,
+      submittedComment,
+      statusDot: reviewState === 'done' ? '#34a55f' : '#e8a13c',
+      statusText: reviewState === 'done' ? 'Review complete' : 'Awaiting CDI review',
+      statusAnim: (reviewState === 'done' ? 'statusInA' : 'statusInB') + ' 0.3s cubic-bezier(0.2, 0, 0, 1) both',
+      undoReview: () => this.setState({ reviewState: 'idle', submittedComment: '', reviewComment: '' }),
+      toggleNotify: () => this.setState(s => ({ notifyOn: !s.notifyOn })),
+      notifyOnStr: String(notifyOn),
+      toggleBg: notifyOn ? '#1e7a43' : '#aeb9c2',
+      knobLeft: notifyOn ? '33px' : '3px',
+      labelLeft: notifyOn ? '9px' : '30px',
+      toggleLabel: notifyOn ? 'ON' : 'OFF'
+    };
+  }
+}
+</script>
+</body>
+</html>

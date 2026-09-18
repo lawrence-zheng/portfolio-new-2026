@@ -7,25 +7,27 @@ import { useEffect } from "react"
 
 export default function Footer() {
   const pathname = usePathname()
-  const { primaryColor } = useColorContext()
+  const { activeTab } = useColorContext()
 
-  // Add background color to html element to prevent white flash when overscrolling
+  // A slightly deeper tint than the about section above, to subtly differentiate the two regions
+  const footerColor =
+    activeTab === "ux-research" ? "#fdf0e6" : activeTab === "ui-engineering" ? "#e6e9fd" : "#EBF1F9"
+
+  // Match the html background so overscroll shows the same color, not a white flash
   useEffect(() => {
-    // Set the background color of the html element to match the end of our gradient
-    document.documentElement.style.backgroundColor = `${primaryColor}10`
+    document.documentElement.style.backgroundColor = footerColor
 
     // Clean up when component unmounts
     return () => {
       document.documentElement.style.backgroundColor = ""
     }
-  }, [primaryColor])
+  }, [footerColor])
 
   return (
     <footer
-      className="py-12 mt-20 pb-24"
+      className="py-12 transition-colors duration-700"
       style={{
-        background: `linear-gradient(to bottom, white 40%, ${primaryColor}10)`,
-        minHeight: "50vh", // Ensure footer has a minimum height
+        backgroundColor: footerColor,
       }}
     >
       <div className="max-w-7xl mx-auto px-6">

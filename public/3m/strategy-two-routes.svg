@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 630" role="img" aria-label="Systems diagram opening with leadership's quote about getting users to work in the app instead of elsewhere, then two routes to the adoption goal: trying to replace other apps' functionality, which stalls because only 20 percent work from the worklist, versus fitting the existing workflow, which compounds adoption. The reality-check band illustrates the clinician's desk: a team-lead spreadsheet, Epic on a large monitor, and our app on a smaller second monitor receiving a glance, not a destination." font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif">
+  <rect x="0" y="0" width="1000" height="630" fill="#ffffff"/>
+
+  <defs>
+    <marker id="m-ink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#27272a"/>
+    </marker>
+    <marker id="m-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626"/>
+    </marker>
+    <marker id="m-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <!-- kicker quote -->
+  <text x="500" y="42" font-size="17" font-style="italic" fill="#27272a" text-anchor="middle">“Let's get them working in our app instead of elsewhere.”</text>
+  <text x="500" y="64" font-size="10" letter-spacing="1.5" fill="#71717a" text-anchor="middle">PRODUCT LEADERSHIP, AT THE START</text>
+
+  <!-- goal -->
+  <rect x="350" y="84" width="300" height="60" rx="10" fill="#ffffff" stroke="#27272a" stroke-width="1.6"/>
+  <text x="500" y="106" font-size="10" letter-spacing="1.5" fill="#71717a" text-anchor="middle">THE GOAL BEHIND THE ASK</text>
+  <text x="500" y="127" font-size="13.5" font-weight="700" fill="#27272a" text-anchor="middle">greater adoption → revenue</text>
+
+  <!-- fork -->
+  <path d="M 500 144 C 500 172, 250 170, 250 192" fill="none" stroke="#27272a" stroke-width="1.4" marker-end="url(#m-ink)"/>
+  <path d="M 500 144 C 500 172, 750 170, 750 192" fill="none" stroke="#27272a" stroke-width="1.4" marker-end="url(#m-ink)"/>
+
+  <!-- routes -->
+  <rect x="120" y="198" width="260" height="64" rx="10" fill="#ffffff" stroke="#a1a1aa" stroke-width="1.3" stroke-dasharray="6 4"/>
+  <text x="250" y="221" font-size="9.5" letter-spacing="1" font-weight="700" fill="#dc2626" text-anchor="middle">THE ASSUMED ROUTE</text>
+  <text x="250" y="242" font-size="12" fill="#27272a" text-anchor="middle">try to replace other apps' functionality</text>
+
+  <rect x="620" y="198" width="260" height="64" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.6"/>
+  <text x="750" y="221" font-size="9.5" letter-spacing="1" font-weight="700" fill="#2563eb" text-anchor="middle">THE ROUTE I ARGUED FOR</text>
+  <text x="750" y="242" font-size="12" fill="#27272a" text-anchor="middle">fit the workflow that already exists</text>
+
+  <line x1="250" y1="262" x2="250" y2="308" stroke="#27272a" stroke-width="1.4" marker-end="url(#m-ink)"/>
+  <line x1="750" y1="262" x2="750" y2="308" stroke="#2563eb" stroke-width="1.4" marker-end="url(#m-blue)"/>
+
+  <!-- reality band with desk illustration -->
+  <rect x="120" y="314" width="760" height="170" rx="10" fill="#f4f4f3" stroke="#27272a" stroke-width="1.2"/>
+  <text x="140" y="338" font-size="10" letter-spacing="1.5" fill="#71717a">REALITY CHECK: THE CLINICIAN'S DESK (MY RESEARCH)</text>
+
+  <!-- team-lead spreadsheet -->
+  <rect x="165" y="375" width="120" height="70" rx="4" fill="#ffffff" stroke="#27272a" stroke-width="1.3"/>
+  <rect x="165" y="375" width="120" height="18" rx="4" fill="#e4e4e7"/>
+  <line x1="165" y1="410" x2="285" y2="410" stroke="#e4e4e7" stroke-width="1.2"/>
+  <line x1="165" y1="427" x2="285" y2="427" stroke="#e4e4e7" stroke-width="1.2"/>
+  <line x1="205" y1="393" x2="205" y2="445" stroke="#e4e4e7" stroke-width="1.2"/>
+  <line x1="245" y1="393" x2="245" y2="445" stroke="#e4e4e7" stroke-width="1.2"/>
+  <text x="225" y="466" font-size="11" fill="#52525b" text-anchor="middle">team-lead lists (Excel / Access)</text>
+
+  <!-- Epic, monitor 1 -->
+  <rect x="350" y="350" width="200" height="95" rx="6" fill="#ffffff" stroke="#27272a" stroke-width="1.5"/>
+  <rect x="358" y="358" width="184" height="10" rx="2" fill="#e4e4e7"/>
+  <rect x="358" y="374" width="42" height="63" rx="2" fill="#f4f4f5"/>
+  <rect x="408" y="378" width="120" height="7" rx="2" fill="#e4e4e7"/>
+  <rect x="408" y="391" width="100" height="7" rx="2" fill="#e4e4e7"/>
+  <rect x="408" y="404" width="120" height="7" rx="2" fill="#e4e4e7"/>
+  <rect x="408" y="417" width="85" height="7" rx="2" fill="#e4e4e7"/>
+  <text x="450" y="466" font-size="11" fill="#52525b" text-anchor="middle"><tspan font-weight="700" fill="#27272a">Epic</tspan> · EHR of record · monitor 1</text>
+
+  <!-- glance annotation -->
+  <path d="M 550 362 C 592 340, 652 342, 690 372" fill="none" stroke="#2563eb" stroke-width="1.2" stroke-dasharray="5 5"/>
+  <polygon points="685,367 693,375 688,364" fill="#2563eb"/>
+  <text x="622" y="334" font-size="10.5" font-style="italic" fill="#71717a" text-anchor="middle">a glance, not a destination</text>
+
+  <!-- our app, monitor 2 -->
+  <rect x="690" y="375" width="120" height="70" rx="5" fill="#ffffff" stroke="#2563eb" stroke-width="1.6"/>
+  <rect x="698" y="382" width="104" height="8" rx="2" fill="#dbeafe"/>
+  <rect x="698" y="396" width="104" height="12" rx="2" fill="#2563eb"/>
+  <rect x="698" y="412" width="104" height="12" rx="2" fill="#eff6ff"/>
+  <rect x="698" y="428" width="104" height="12" rx="2" fill="#eff6ff"/>
+  <text x="750" y="466" font-size="11" fill="#52525b" text-anchor="middle"><tspan font-weight="700" fill="#2563eb">our app</tspan> · monitor 2</text>
+
+  <line x1="250" y1="484" x2="250" y2="528" stroke="#27272a" stroke-width="1.4" marker-end="url(#m-ink)"/>
+  <line x1="750" y1="484" x2="750" y2="528" stroke="#2563eb" stroke-width="1.4" marker-end="url(#m-blue)"/>
+
+  <!-- outcomes -->
+  <rect x="100" y="534" width="300" height="56" rx="10" fill="#ffffff" stroke="#dc2626" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <text x="250" y="557" font-size="13" font-weight="700" fill="#dc2626" text-anchor="middle">✗  stalls</text>
+  <text x="250" y="576" font-size="11.5" fill="#52525b" text-anchor="middle">only ~20% work from the worklist</text>
+
+  <rect x="600" y="534" width="300" height="56" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.6"/>
+  <text x="750" y="557" font-size="13" font-weight="700" fill="#2563eb" text-anchor="middle">✓  compounds</text>
+  <text x="750" y="576" font-size="11.5" fill="#27272a" text-anchor="middle">value lands where 100% already work</text>
+
+  <!-- return loops, kept quiet -->
+  <path d="M 94 558 C 30 470, 15 300, 45 185 C 65 120, 200 110, 338 110" fill="none" stroke="#dc2626" stroke-width="1.1" stroke-dasharray="6 6" opacity="0.55" marker-end="url(#m-red)"/>
+  <path d="M 906 558 C 970 470, 985 300, 955 185 C 935 120, 800 110, 662 110" fill="none" stroke="#2563eb" stroke-width="1.2" opacity="0.65" marker-end="url(#m-blue)"/>
+</svg>
