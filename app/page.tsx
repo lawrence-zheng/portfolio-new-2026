@@ -38,6 +38,28 @@ interface ProjectData {
   }[]
   categories: string[]
   logo?: string
+  /** Launch build: case study not published yet. Renders a greyed, non-clickable "Coming soon" card. */
+  comingSoon?: boolean
+}
+
+/** Wraps card media in a Link when the project is live, or an inert div when it is coming soon. */
+function CardLink({
+  href,
+  className,
+  children,
+}: {
+  href?: string
+  className?: string
+  children: React.ReactNode
+}) {
+  if (!href) {
+    return <div className={className}>{children}</div>
+  }
+  return (
+    <Link href={href} className={className}>
+      {children}
+    </Link>
+  )
 }
 
 export default function Home() {
@@ -154,6 +176,7 @@ export default function Home() {
     },
     {
       id: "govini",
+      comingSoon: true,
       title: "Modernizing U.S. government data workflows for critical defense operations",
       shortTitle: "Modernizing U.S. defense data workflows",
       company: "Govini",
@@ -182,6 +205,7 @@ export default function Home() {
     },
     {
       id: "play-for-people-skills",
+      comingSoon: true,
       title: "Creating a social game to unlock student learning motivation",
       shortTitle: "A social game that unlocks student motivation",
       company: "Play for People Skills",
@@ -210,6 +234,7 @@ export default function Home() {
     },
     {
       id: "icpsr-project",
+      comingSoon: true,
       title: "Modernizing a search page to increase efficiency by 60%",
       shortTitle: "Modernizing search for social science research",
       company: "ICPSR",
@@ -238,6 +263,7 @@ export default function Home() {
     },
     {
       id: "delallo",
+      comingSoon: true,
       title: "Elevating family culinary connections for DeLallo",
       shortTitle: "Elevating family culinary connections",
       company: "DeLallo",
@@ -314,7 +340,7 @@ export default function Home() {
 
   // Get filtered and ordered projects. The first project for the active filter is "featured" (full-width
   // 60/40 treatment); the rest render as compressed cards with concise copy.
-  const filteredProjects = getFilteredProjects()
+  const filteredProjects = projectsData
   const otherProjects = filteredProjects.slice(1)
 
   // Improved handle filter change with smoother animations
@@ -931,50 +957,6 @@ export default function Home() {
           id="filters-section"
         >
           <div className="bg-white rounded-2xl shadow-lg p-6 md:p-10 lg:p-12">
-            {/* Filter options */}
-            <div className="flex items-center justify-center gap-2 mb-6 text-center">
-              <h2 className="text-lg font-serif font-normal text-gray-800 normal-case">
-                Select an industry or project type
-              </h2>
-              <Tooltip content={tooltipContent} width="400px" position="bottom">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-gray-500 translate-y-[2px]"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 16v-4" />
-                  <path d="M12 8h.01" />
-                </svg>
-              </Tooltip>
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-2">
-              {filterOptions.map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => handleFilterChange(filter.toLowerCase())}
-                  className={`px-4 py-1.5 rounded-full font-sans text-xs md:text-sm uppercase tracking-wider transition-all duration-300 border ${
-                    activeFilter === filter.toLowerCase()
-                      ? "text-white border-transparent"
-                      : "text-gray-600 border-gray-200 hover:bg-gray-50"
-                  }`}
-                  style={{
-                    backgroundColor: activeFilter === filter.toLowerCase() ? primaryColor : "transparent",
-                  }}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
-
             {/* Case Studies - each project is a divided section within the single shared card */}
             <div
               ref={projectsContainerRef}
@@ -1112,102 +1094,131 @@ export default function Home() {
                   style={{ borderTopColor: getBannerBackgroundColor() }}
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-12">
-                    {otherProjects.map((project) => (
+                    {otherProjects.map((project) => {
+                      const href = project.comingSoon ? undefined : `/${project.id}`
+                      return (
                       <div key={project.id} id={`${project.id}-section`} className="project-content flex flex-col">
-                        {project.pixelThumb ? (
-                          <Link
-                            href={`/${project.id}`}
-                            className="relative border border-gray-200 overflow-hidden rounded-md block w-full group"
-                          >
-                            <Image
-                              src={project.pixelThumb}
-                              alt={project.imageAlt}
-                              width={1280}
-                              height={960}
-                              className="w-full h-auto transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-                            />
-                          </Link>
-                        ) : project.backgroundImage && project.screenImage ? (
-                          <CompositeThumbnail
-                            backgroundImage={project.backgroundImage}
-                            screenImage={project.screenImage}
-                            alt={project.imageAlt}
-                            href={`/${project.id}`}
-                          />
-                        ) : (
-                          <Link
-                            href={`/${project.id}`}
-                            className="relative border border-gray-200 overflow-hidden rounded-md bg-white block w-full"
-                          >
-                            <Image
-                              src={project.image || "/placeholder.svg"}
-                              alt={project.imageAlt}
-                              width={600}
-                              height={500}
-                              className="w-full hover:scale-105 transition-all duration-500"
-                            />
-                          </Link>
-                        )}
-
-                        <h3 className="text-2xl font-serif font-normal tracking-tight leading-snug normal-case mt-6">
-                          <Link
-                            href={`/${project.id}`}
-                            className="transition-colors duration-300"
-                            style={{
-                              ...titleLinkStyle,
-                              color: "rgb(31, 41, 55)"
-                            }}
-                          >
-                            {project.shortTitle}
-                          </Link>
-                        </h3>
-
-                        <p className="text-gray-700 font-sans text-base leading-relaxed mt-2">
-                          {project.shortDescription}
-                        </p>
-
-                        <div className="flex flex-wrap gap-x-8 gap-y-2 mt-4">
-                          {project.stats.map((stat, statIndex) => (
-                            <div key={statIndex} className="flex items-baseline gap-1.5">
-                              <span className="text-lg font-sans font-medium text-gray-800 normal-case">
-                                {stat.value}
-                              </span>
-                              <span className="text-xs text-gray-600 font-sans">{stat.label}</span>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="mt-4 flex items-center gap-3">
-                          <Link
-                            href={`/${project.id}`}
-                            className="font-sans text-sm font-medium hover:opacity-80 transition-opacity"
-                            style={{ color: primaryColor }}
-                          >
-                            Read case study →
-                          </Link>
-                          {isPasswordProtected(project.id) && (
-                            <span className="inline-flex items-center gap-1 font-sans text-xs text-gray-500">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="12"
-                                height="12"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="lucide lucide-lock"
+                        <div className="relative">
+                          <div className={project.comingSoon ? "grayscale opacity-45" : ""}>
+                            {project.pixelThumb ? (
+                              <CardLink
+                                href={href}
+                                className="relative border border-gray-200 overflow-hidden rounded-md block w-full group"
                               >
-                                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                              </svg>
-                              Password required
+                                <Image
+                                  src={project.pixelThumb}
+                                  alt={project.imageAlt}
+                                  width={1280}
+                                  height={960}
+                                  className="w-full h-auto transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                                />
+                              </CardLink>
+                            ) : project.backgroundImage && project.screenImage ? (
+                              <CompositeThumbnail
+                                backgroundImage={project.backgroundImage}
+                                screenImage={project.screenImage}
+                                alt={project.imageAlt}
+                                href={href}
+                              />
+                            ) : (
+                              <CardLink
+                                href={href}
+                                className="relative border border-gray-200 overflow-hidden rounded-md bg-white block w-full"
+                              >
+                                <Image
+                                  src={project.image || "/placeholder.svg"}
+                                  alt={project.imageAlt}
+                                  width={600}
+                                  height={500}
+                                  className="w-full hover:scale-105 transition-all duration-500"
+                                />
+                              </CardLink>
+                            )}
+                          </div>
+
+                          {project.comingSoon && (
+                            <span className="absolute top-3 left-3 inline-flex items-center rounded-full bg-white/90 px-3 py-1 font-sans text-[11px] uppercase tracking-wider text-gray-600 shadow-sm backdrop-blur-sm">
+                              Coming soon
                             </span>
                           )}
                         </div>
+
+                        <h3 className="text-2xl font-serif font-normal tracking-tight leading-snug normal-case mt-6">
+                          {project.comingSoon ? (
+                            <span className="text-gray-400">{project.shortTitle}</span>
+                          ) : (
+                            <Link
+                              href={`/${project.id}`}
+                              className="transition-colors duration-300"
+                              style={{
+                                ...titleLinkStyle,
+                                color: "rgb(31, 41, 55)"
+                              }}
+                            >
+                              {project.shortTitle}
+                            </Link>
+                          )}
+                        </h3>
+
+                        <p
+                          className={`font-sans text-base leading-relaxed mt-2 ${
+                            project.comingSoon ? "text-gray-400" : "text-gray-700"
+                          }`}
+                        >
+                          {project.shortDescription}
+                        </p>
+
+                        {!project.comingSoon && (
+                          <div className="flex flex-wrap gap-x-8 gap-y-2 mt-4">
+                            {project.stats.map((stat, statIndex) => (
+                              <div key={statIndex} className="flex items-baseline gap-1.5">
+                                <span className="text-lg font-sans font-medium text-gray-800 normal-case">
+                                  {stat.value}
+                                </span>
+                                <span className="text-xs text-gray-600 font-sans">{stat.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="mt-4 flex items-center gap-3">
+                          {project.comingSoon ? (
+                            <span className="font-sans text-sm font-medium text-gray-400">Case study in progress</span>
+                          ) : (
+                            <>
+                              <Link
+                                href={`/${project.id}`}
+                                className="font-sans text-sm font-medium hover:opacity-80 transition-opacity"
+                                style={{ color: primaryColor }}
+                              >
+                                Read case study →
+                              </Link>
+                              {isPasswordProtected(project.id) && (
+                                <span className="inline-flex items-center gap-1 font-sans text-xs text-gray-500">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="lucide lucide-lock"
+                                  >
+                                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                  </svg>
+                                  Password required
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </div>
                       </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               )}

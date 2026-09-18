@@ -8,7 +8,8 @@ interface CompositeThumbnailProps {
   backgroundImage: string
   screenImage: string
   alt: string
-  href: string
+  /** Omit to render an inert, non-clickable frame (used by "Coming soon" cards). */
+  href?: string
   /** CSS aspect-ratio for the thumbnail frame. The background crops to fill it; the screen stays fully visible. */
   aspectRatio?: string
 }
@@ -22,14 +23,10 @@ export default function CompositeThumbnail({
 }: CompositeThumbnailProps) {
   const [isHovered, setIsHovered] = useState(false)
 
-  return (
-    <Link
-      href={href}
-      className="relative border border-gray-200 overflow-hidden rounded-md bg-white block w-full"
-      style={{ aspectRatio }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+  const frameClass = "relative border border-gray-200 overflow-hidden rounded-md bg-white block w-full"
+
+  const content = (
+    <>
       {/* Background image - static, crops vertically to fill the wide frame */}
       <Image
         src={backgroundImage}
@@ -50,6 +47,26 @@ export default function CompositeThumbnail({
           sizes="(max-width: 600px) 100vw, 600px"
         />
       </div>
+    </>
+  )
+
+  if (!href) {
+    return (
+      <div className={frameClass} style={{ aspectRatio }}>
+        {content}
+      </div>
+    )
+  }
+
+  return (
+    <Link
+      href={href}
+      className={frameClass}
+      style={{ aspectRatio }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {content}
     </Link>
   )
 } 
