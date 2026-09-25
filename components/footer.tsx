@@ -54,7 +54,7 @@ export default function Footer() {
             </h2>
 
             {/* Copyright text */}
-            <p className="text-base text-gray-500 mb-1">© Lawrence Zheng 2025</p>
+            <p className="text-base text-gray-500 mb-1">© Lawrence Zheng 2026</p>
             <p className="text-base text-gray-500">Made with love, lo-fi beats and lots of iteration.</p>
           </div>
 
@@ -92,23 +92,13 @@ export default function Footer() {
             </h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/placeholder-project" className="text-gray-600 hover:text-gray-900 transition">
+                <Link href="/3m" className="text-gray-600 hover:text-gray-900 transition">
                   3M M*Modal
-                </Link>
-              </li>
-              <li>
-                <Link href="/play-for-people-skills" className="text-gray-600 hover:text-gray-900 transition">
-                  Play For People Skills
                 </Link>
               </li>
               <li>
                 <Link href="/icpsr-project" className="text-gray-600 hover:text-gray-900 transition">
                   ICPSR
-                </Link>
-              </li>
-              <li>
-                <Link href="/pixel-art" className="text-gray-600 hover:text-gray-900 transition">
-                  Pixel art
                 </Link>
               </li>
               <li>

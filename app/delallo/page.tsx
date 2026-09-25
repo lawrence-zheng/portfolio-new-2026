@@ -13,9 +13,11 @@ import { Check } from "lucide-react"
 import Navbar from "@/components/navbar" // Import the shared Navbar component
 import Learning from "@/components/learning"
 import { useColorContext } from "@/context/color-context"
+import PasswordProtection from "@/components/password-protection"
+import { WIP_CASE_STUDY_MESSAGE, WIP_CASE_STUDY_PASSWORD } from "@/lib/case-study-access"
 import "@/styles/case-study.css"
 
-export default function DeLalloProject() {
+function DeLalloProject() {
   const [activeSection, setActiveSection] = useState<string>("overview")
   const { primaryColor, activeTab } = useColorContext()
 
@@ -861,5 +863,20 @@ export default function DeLalloProject() {
         </div>
       </div>
     </main>
+  )
+}
+
+// Work-in-progress case study: gated behind the shared early-look password until it ships.
+export default function DeLalloProjectPage() {
+  return (
+    <PasswordProtection
+      projectId="delallo"
+      correctPassword={WIP_CASE_STUDY_PASSWORD}
+      projectTitle="Elevating family culinary connections"
+      companyName="DeLallo"
+      message={WIP_CASE_STUDY_MESSAGE}
+    >
+      <DeLalloProject />
+    </PasswordProtection>
   )
 }

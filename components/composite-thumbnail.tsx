@@ -8,7 +8,7 @@ interface CompositeThumbnailProps {
   backgroundImage: string
   screenImage: string
   alt: string
-  /** Omit to render an inert, non-clickable frame (used by "Coming soon" cards). */
+  /** Omit to render an inert, non-clickable frame. */
   href?: string
   /** CSS aspect-ratio for the thumbnail frame. The background crops to fill it; the screen stays fully visible. */
   aspectRatio?: string

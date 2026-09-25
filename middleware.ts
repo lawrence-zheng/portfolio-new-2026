@@ -1,19 +1,13 @@
 import { NextResponse } from "next/server"
 
 /**
- * Launch build only: the unfinished case studies still live in the repo so they can be
- * worked on, but their public routes return a 404 until each one ships.
- * To publish one, remove its path from `matcher` below and drop `comingSoon: true`
- * from its entry in `projectsData` (app/page.tsx).
+ * Routes that exist in the repo but should not be public: the component playground, plus case
+ * studies hidden from the homepage for now (`hidden: true` in app/page.tsx).
+ * Visible work-in-progress case studies are not listed here: they are reachable but password-gated
+ * in their own page.tsx (see lib/case-study-access.ts).
  */
 export const config = {
-  matcher: [
-    "/govini",
-    "/play-for-people-skills",
-    "/icpsr-project",
-    "/delallo",
-    "/placeholder-project",
-  ],
+  matcher: ["/placeholder-project", "/govini", "/play-for-people-skills"],
 }
 
 export function middleware(request: Request) {

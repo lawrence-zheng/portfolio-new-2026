@@ -13,6 +13,10 @@ interface PasswordProtectionProps {
   projectTitle: string
   companyLogo?: string
   companyName?: string
+  /** Overrides the default "confidential information" explanation. */
+  message?: string
+  /** When given, rendered only after the password is entered, so gated content never mounts before unlock. */
+  children?: React.ReactNode
 }
 
 export default function PasswordProtection({
@@ -21,6 +25,8 @@ export default function PasswordProtection({
   projectTitle,
   companyLogo,
   companyName,
+  message = "This case study contains confidential information and requires a password to view.",
+  children,
 }: PasswordProtectionProps) {
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -57,7 +63,7 @@ export default function PasswordProtection({
 
   // If authenticated, don't render the protection screen
   if (isAuthenticated) {
-    return null
+    return <>{children}</>
   }
 
   return (
@@ -78,9 +84,7 @@ export default function PasswordProtection({
           <h2 className="text-2xl font-bold mb-2" style={{ textTransform: "none" }}>
             Password Protected
           </h2>
-          <p className="text-gray-600 mb-4">
-            This case study contains confidential information and requires a password to view.
-          </p>
+          <p className="text-gray-600 mb-4">{message}</p>
           <div className="inline-flex items-center gap-1.5 bg-gray-100 px-3 py-1.5 rounded-full text-sm font-medium text-gray-700 mb-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"

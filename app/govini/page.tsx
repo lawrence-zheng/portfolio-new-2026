@@ -14,9 +14,11 @@ import FilterCards from "@/components/filter-cards"
 import Navbar from "@/components/navbar"
 import Learning from "@/components/learning"
 import { useColorContext } from "@/context/color-context"
+import PasswordProtection from "@/components/password-protection"
+import { WIP_CASE_STUDY_MESSAGE, WIP_CASE_STUDY_PASSWORD } from "@/lib/case-study-access"
 import "@/styles/case-study.css"
 
-export default function BOMManagerProject() {
+function BOMManagerProject() {
   const [activeSection, setActiveSection] = useState<string>("solution-preview")
   const { primaryColor, activeTab } = useColorContext()
 
@@ -1466,5 +1468,20 @@ export default function BOMManagerProject() {
         </div>
       </div>
     </main>
+  )
+}
+
+// Work-in-progress case study: gated behind the shared early-look password until it ships.
+export default function BOMManagerProjectPage() {
+  return (
+    <PasswordProtection
+      projectId="govini"
+      correctPassword={WIP_CASE_STUDY_PASSWORD}
+      projectTitle="Modernizing U.S. defense data workflows"
+      companyName="Govini"
+      message={WIP_CASE_STUDY_MESSAGE}
+    >
+      <BOMManagerProject />
+    </PasswordProtection>
   )
 }

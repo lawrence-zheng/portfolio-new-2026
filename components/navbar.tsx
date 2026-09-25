@@ -1,6 +1,9 @@
 "use client"
 
+import type React from "react"
 import { useEffect, useRef, useState } from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useColorContext } from "@/context/color-context"
 import ScrollToTopLink from "./scroll-to-top-link"
 
@@ -11,6 +14,18 @@ export default function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const mouseLeaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [isScrolled, setIsScrolled] = useState<boolean>(false)
+  const pathname = usePathname()
+
+  // "Work" scrolls to the projects on the homepage; from any other page it navigates to /#work,
+  // which the homepage picks up and scrolls to once it mounts.
+  const handleWorkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname !== "/") return
+    const projects = document.getElementById("work")
+    if (!projects) return
+    e.preventDefault()
+    projects.scrollIntoView({ behavior: "smooth" })
+    history.replaceState(null, "", "/#work")
+  }
 
   // Handle click outside to close fun menu
   useEffect(() => {
@@ -126,13 +141,14 @@ export default function Navbar() {
           lawrence zheng
         </ScrollToTopLink>
         <nav className="flex gap-6 text-sm font-sans">
-          <ScrollToTopLink
-            href="/placeholder-project"
+          <Link
+            href="/#work"
+            onClick={handleWorkClick}
             className="transition-colors duration-300 hover:text-opacity-80 uppercase tracking-wider"
-            style={{ color: "rgb(75 85 99)", hoverColor: primaryColor }}
+            style={{ color: "rgb(75 85 99)" }}
           >
             WORK
-          </ScrollToTopLink>
+          </Link>
           <div ref={funMenuRef} className="relative">
             <button
               className="transition-colors duration-300 hover:text-opacity-80 text-sm font-sans flex items-center uppercase tracking-wider"
@@ -177,22 +193,6 @@ export default function Navbar() {
                 >
                   <div className="font-bold">Pixel art</div>
                   <div className="text-xs text-gray-500 mt-0.5">Gallery of my hobby pixel art</div>
-                </ScrollToTopLink>
-                <ScrollToTopLink
-                  href="#favorite-lists"
-                  className="block px-4 py-3 text-gray-700 hover:bg-gray-100"
-                  onClick={() => setShowFunMenu(false)}
-                >
-                  <div className="font-bold">Favorite lists</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Tracking some of my favorite stuff for fun</div>
-                </ScrollToTopLink>
-                <ScrollToTopLink
-                  href="#portfolio-iterations"
-                  className="block px-4 py-3 text-gray-700 hover:bg-gray-100"
-                  onClick={() => setShowFunMenu(false)}
-                >
-                  <div className="font-bold">Portfolio iterations</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Evolution of my UX portfolio over the years</div>
                 </ScrollToTopLink>
               </div>
             )}
