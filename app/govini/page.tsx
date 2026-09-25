@@ -15,7 +15,6 @@ import Navbar from "@/components/navbar"
 import Learning from "@/components/learning"
 import { useColorContext } from "@/context/color-context"
 import PasswordProtection from "@/components/password-protection"
-import { WIP_CASE_STUDY_MESSAGE, WIP_CASE_STUDY_PASSWORD } from "@/lib/case-study-access"
 import "@/styles/case-study.css"
 
 function BOMManagerProject() {
@@ -1474,13 +1473,7 @@ function BOMManagerProject() {
 // Work-in-progress case study: gated behind the shared early-look password until it ships.
 export default function BOMManagerProjectPage() {
   return (
-    <PasswordProtection
-      projectId="govini"
-      correctPassword={WIP_CASE_STUDY_PASSWORD}
-      projectTitle="Modernizing U.S. defense data workflows"
-      companyName="Govini"
-      message={WIP_CASE_STUDY_MESSAGE}
-    >
+    <PasswordProtection projectId="govini">
       <BOMManagerProject />
     </PasswordProtection>
   )

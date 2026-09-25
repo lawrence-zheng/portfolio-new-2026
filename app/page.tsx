@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import "./hero-text-wrap.css"
 import "./pixel-decorations.css"
@@ -14,6 +15,8 @@ import Navbar from "@/components/navbar"
 import { useColorContext } from "@/context/color-context"
 import CompositeThumbnail from "@/components/composite-thumbnail"
 import AboutMe from "@/components/about-me"
+import PasswordModal from "@/components/password-modal"
+import { isCaseStudyUnlocked } from "@/lib/case-study-access"
 
 // Define project data with categories for filtering
 interface ProjectData {
@@ -62,6 +65,8 @@ export default function Home() {
   const [projectsTransform, setProjectsTransform] = useState<string>("translateY(0)")
   const [mobileLayoutFixed, setMobileLayoutFixed] = useState<boolean>(true) // Start with layout fixed
   const [projectsVisible, setProjectsVisible] = useState<boolean>(true)
+  const [lockedProject, setLockedProject] = useState<ProjectData | null>(null)
+  const router = useRouter()
 
   // Mark as client-side to prevent hydration issues
   useEffect(() => {
@@ -77,6 +82,24 @@ export default function Home() {
     }, 100)
     return () => clearTimeout(timeout)
   }, [])
+
+  // Sent here from a password-protected case study (/?unlock=<id>): open its password modal.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const unlockId = params.get("unlock")
+    if (!unlockId) return
+    window.history.replaceState(null, "", window.location.pathname + window.location.hash)
+    const project = projectsData.find((p) => p.id === unlockId && p.comingSoon)
+    if (project && !isCaseStudyUnlocked(project.id)) setLockedProject(project)
+  }, [])
+
+  // Links inside a password-protected card open the password modal instead of navigating.
+  const handleLockedCardClick = (project: ProjectData) => (e: React.MouseEvent) => {
+    if (!project.comingSoon || isCaseStudyUnlocked(project.id)) return
+    if (!(e.target as HTMLElement).closest("a")) return
+    e.preventDefault()
+    setLockedProject(project)
+  }
 
   // Check if the screen is mobile size
   useEffect(() => {
@@ -970,6 +993,7 @@ export default function Home() {
                   key={project.id}
                   id={`${project.id}-section`}
                   className={`project-section mt-5 ${isFilterChanging ? "mobile-transition-active" : ""}`}
+                  onClickCapture={handleLockedCardClick(project)}
                 >
                   <div
                     className={`grid grid-cols-1 lg:grid-cols-5 gap-10 items-center ${mobileLayoutFixed ? "mobile-layout-fixed" : ""}`}
@@ -1093,7 +1117,12 @@ export default function Home() {
                     {otherProjects.map((project) => {
                       const href = `/${project.id}`
                       return (
-                      <div key={project.id} id={`${project.id}-section`} className="project-content flex flex-col">
+                      <div
+                        key={project.id}
+                        id={`${project.id}-section`}
+                        className="project-content flex flex-col"
+                        onClickCapture={handleLockedCardClick(project)}
+                      >
                         <div className="relative">
                             {project.pixelThumb ? (
                               <Link
@@ -1212,6 +1241,15 @@ export default function Home() {
           </div>
         </section>
       </div>
+
+      <PasswordModal
+        project={lockedProject && { id: lockedProject.id, title: lockedProject.shortTitle, company: lockedProject.company }}
+        onClose={() => setLockedProject(null)}
+        onUnlock={(projectId) => {
+          setLockedProject(null)
+          router.push(`/${projectId}`)
+        }}
+      />
     </main>
   )
 }

@@ -16,7 +16,6 @@ import Learning from "@/components/learning"
 import Navbar from "@/components/navbar"
 import { useColorContext } from "@/context/color-context"
 import PasswordProtection from "@/components/password-protection"
-import { WIP_CASE_STUDY_MESSAGE, WIP_CASE_STUDY_PASSWORD } from "@/lib/case-study-access"
 import "@/styles/case-study.css"
 
 function IcpsrProject() {
@@ -1093,13 +1092,7 @@ function IcpsrProject() {
 // Work-in-progress case study: gated behind the shared early-look password until it ships.
 export default function IcpsrProjectPage() {
   return (
-    <PasswordProtection
-      projectId="icpsr-project"
-      correctPassword={WIP_CASE_STUDY_PASSWORD}
-      projectTitle="Modernizing search for social science research"
-      companyName="ICPSR"
-      message={WIP_CASE_STUDY_MESSAGE}
-    >
+    <PasswordProtection projectId="icpsr-project">
       <IcpsrProject />
     </PasswordProtection>
   )
