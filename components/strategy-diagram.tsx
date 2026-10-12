@@ -1,11 +1,15 @@
 "use client"
 
+import { useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
+import { Maximize2, X } from "lucide-react"
+
 /**
  * The 3M strategy argument as a theme-native inline diagram.
  * The leadership ask opens the diagram as a chat-style message, flowing
  * into the goal, the two routes, the desk reality, and the outcomes.
  * Desktop: wide layout with gently arcing feedback loops in the margins.
- * Mobile: the same argument stacked tighter, loops omitted.
+ * Mobile: the same argument stacked tighter, loops omitted; tap to open it enlarged in a lightbox.
  * Inherits the page's font stack via className and takes the active
  * primaryColor so it re-tints with the rest of the page.
  */
@@ -25,6 +29,24 @@ export default function StrategyDiagram({ primaryColor }: { primaryColor: string
   const accent = primaryColor
   const accentFill = `${primaryColor}14`
   const accentSoft = `${primaryColor}33`
+
+  const [open, setOpen] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  // Lightbox: close on Escape, lock page scroll, and start panned to the diagram's horizontal center
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false)
+    document.addEventListener("keydown", onKey)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    const el = scrollRef.current
+    if (el) el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2
+    return () => {
+      document.removeEventListener("keydown", onKey)
+      document.body.style.overflow = prevOverflow
+    }
+  }, [open])
 
   return (
     <figure className="m-0">
@@ -130,105 +152,148 @@ export default function StrategyDiagram({ primaryColor }: { primaryColor: string
         <path d="M 1066 628 C 1195 560, 1195 170, 776 136" fill="none" stroke={accent} strokeWidth="1.3" opacity="0.65" markerEnd="url(#sd-acc)" />
       </svg>
 
-      {/* ===== Mobile, stacked tighter, loops omitted ===== */}
-      <svg viewBox="0 0 420 496" role="img" aria-label={ARIA} className="md:hidden w-full h-auto font-sans">
-        <defs>
-          <marker id="sdm-ink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 0 L 10 5 L 0 10 z" fill={INK} />
-          </marker>
-          <marker id="sdm-acc" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 0 L 10 5 L 0 10 z" fill={accent} />
-          </marker>
-        </defs>
+      {/* ===== Mobile, stacked tighter, loops omitted. Its text is too small to read at phone
+          width, so tapping it opens the same diagram enlarged in a pannable lightbox. ===== */}
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="md:hidden block w-full text-left"
+        aria-label="Enlarge strategy diagram"
+      >
+        <MobileDiagram accent={accent} idPrefix="sdm" />
+        <span className="mt-3 flex items-center justify-center gap-1.5 type-caption text-gray-500">
+          <Maximize2 className="w-3.5 h-3.5" aria-hidden />
+          Tap to enlarge
+        </span>
+      </button>
 
-        {/* the ask, styled like the chat-thread mockup */}
-        <rect x="78" y="12" width="250" height="58" rx="10" fill={PANEL} stroke="#d1d5db" strokeWidth="1" />
-        <circle cx="100" cy="36" r="12" fill={INK} />
-        <text x="100" y="40" fontSize="9" fontWeight="700" fill="#ffffff" textAnchor="middle">LT</text>
-        <text x="122" y="30" fontSize="11" fontWeight="700" fill={INK}>
-          Leadership <tspan fontWeight="400" fontSize="8.5" fill={MUTED}>product VP · at the start</tspan>
-        </text>
-        <text x="122" y="47" fontSize="11" fill={SUB}>Let’s get them working in our app</text>
-        <text x="122" y="61" fontSize="11" fill={SUB}>instead of elsewhere.</text>
-        <line x1="210" y1="70" x2="210" y2="88" stroke={INK} strokeWidth="1.2" markerEnd="url(#sdm-ink)" />
-
-        {/* goal */}
-        <rect x="85" y="94" width="250" height="52" rx="9" fill="#ffffff" stroke={INK} strokeWidth="1.4" />
-        <text x="210" y="114" fontSize="8.5" letterSpacing="1" fill={MUTED} textAnchor="middle">THE GOAL BEHIND THE ASK</text>
-        <text x="210" y="132" fontSize="11.5" fontWeight="700" fill={INK} textAnchor="middle">greater adoption → revenue</text>
-
-        {/* fork */}
-        <path d="M 210 146 C 210 160, 107 158, 107 170" fill="none" stroke={INK} strokeWidth="1.2" markerEnd="url(#sdm-ink)" />
-        <path d="M 210 146 C 210 160, 313 158, 313 170" fill="none" stroke={INK} strokeWidth="1.2" markerEnd="url(#sdm-ink)" />
-
-        {/* routes */}
-        <rect x="12" y="176" width="190" height="64" rx="9" fill="#ffffff" stroke={FAINT} strokeWidth="1.2" strokeDasharray="5 4" />
-        <text x="107" y="196" fontSize="8.5" letterSpacing="0.5" fontWeight="700" fill={RED} textAnchor="middle">THE ASSUMED ROUTE</text>
-        <text x="107" y="213" fontSize="10.5" fill={INK} textAnchor="middle">try to replace other</text>
-        <text x="107" y="227" fontSize="10.5" fill={INK} textAnchor="middle">apps’ functionality</text>
-
-        <rect x="218" y="176" width="190" height="64" rx="9" fill={accentFill} stroke={accent} strokeWidth="1.4" />
-        <text x="313" y="196" fontSize="8.5" letterSpacing="0.5" fontWeight="700" fill={accent} textAnchor="middle">THE ROUTE I ARGUED FOR</text>
-        <text x="313" y="213" fontSize="10.5" fill={INK} textAnchor="middle">fit the workflow that</text>
-        <text x="313" y="227" fontSize="10.5" fill={INK} textAnchor="middle">already exists</text>
-
-        <line x1="107" y1="240" x2="107" y2="266" stroke={INK} strokeWidth="1.2" markerEnd="url(#sdm-ink)" />
-        <line x1="313" y1="240" x2="313" y2="266" stroke={accent} strokeWidth="1.2" markerEnd="url(#sdm-acc)" />
-
-        {/* reality band */}
-        <rect x="12" y="272" width="396" height="126" rx="9" fill="#ffffff" fillOpacity="0.55" stroke={INK} strokeWidth="1.1" />
-        <text x="210" y="290" fontSize="8.5" letterSpacing="1" fill={MUTED} textAnchor="middle">REALITY CHECK: THE CLINICIAN’S DESK (MY RESEARCH)</text>
-
-        {/* spreadsheet */}
-        <rect x="28" y="300" width="82" height="50" rx="3" fill="#ffffff" stroke={INK} strokeWidth="1.1" />
-        <rect x="28" y="300" width="82" height="14" rx="3" fill={LINE} />
-        <line x1="28" y1="326" x2="110" y2="326" stroke={LINE} strokeWidth="1" />
-        <line x1="28" y1="338" x2="110" y2="338" stroke={LINE} strokeWidth="1" />
-        <line x1="55" y1="314" x2="55" y2="350" stroke={LINE} strokeWidth="1" />
-        <line x1="83" y1="314" x2="83" y2="350" stroke={LINE} strokeWidth="1" />
-
-        {/* Epic */}
-        <rect x="128" y="296" width="134" height="62" rx="4" fill="#ffffff" stroke={INK} strokeWidth="1.2" />
-        <rect x="134" y="302" width="122" height="7" rx="2" fill={LINE} />
-        <rect x="134" y="313" width="26" height="40" rx="2" fill={PANEL} />
-        <rect x="166" y="315" width="86" height="5" rx="2" fill={LINE} />
-        <rect x="166" y="324" width="70" height="5" rx="2" fill={LINE} />
-        <rect x="166" y="333" width="86" height="5" rx="2" fill={LINE} />
-        <rect x="166" y="342" width="60" height="5" rx="2" fill={LINE} />
-
-        {/* glance */}
-        <path d="M 262 302 C 274 288, 288 290, 298 306" fill="none" stroke={accent} strokeWidth="1" strokeDasharray="4 4" />
-        <polygon points="293,300 299,308 289,306" fill={accent} />
-
-        {/* our app */}
-        <rect x="286" y="310" width="92" height="48" rx="4" fill="#ffffff" stroke={accent} strokeWidth="1.3" />
-        <rect x="292" y="316" width="80" height="6" rx="2" fill={accentSoft} />
-        <rect x="292" y="326" width="80" height="8" rx="2" fill={accent} />
-        <rect x="292" y="337" width="80" height="8" rx="2" fill={accentFill} />
-        <rect x="292" y="348" width="80" height="8" rx="2" fill={accentFill} />
-
-        {/* labels */}
-        <text x="69" y="376" fontSize="9" fontWeight="700" fill={INK} textAnchor="middle">Team-lead lists</text>
-        <text x="69" y="388" fontSize="8" fill={MUTED} textAnchor="middle">Excel / Access</text>
-        <text x="195" y="376" fontSize="9" fontWeight="700" fill={INK} textAnchor="middle">Epic</text>
-        <text x="195" y="388" fontSize="8" fill={MUTED} textAnchor="middle">EHR of record · monitor 1</text>
-        <text x="332" y="376" fontSize="9" fontWeight="700" fill={accent} textAnchor="middle">our app</text>
-        <text x="332" y="388" fontSize="8" fill={MUTED} textAnchor="middle">monitor 2</text>
-
-        <line x1="107" y1="402" x2="107" y2="426" stroke={INK} strokeWidth="1.2" markerEnd="url(#sdm-ink)" />
-        <line x1="313" y1="402" x2="313" y2="426" stroke={accent} strokeWidth="1.2" markerEnd="url(#sdm-acc)" />
-
-        {/* outcomes */}
-        <rect x="12" y="432" width="190" height="56" rx="9" fill="#ffffff" stroke={RED} strokeWidth="1.3" strokeDasharray="5 4" />
-        <text x="107" y="452" fontSize="11" fontWeight="700" fill={RED} textAnchor="middle">✗  stalls</text>
-        <text x="107" y="467" fontSize="9.5" fill={SUB} textAnchor="middle">only ~20% work from</text>
-        <text x="107" y="479" fontSize="9.5" fill={SUB} textAnchor="middle">the worklist</text>
-
-        <rect x="218" y="432" width="190" height="56" rx="9" fill={accentFill} stroke={accent} strokeWidth="1.4" />
-        <text x="313" y="452" fontSize="11" fontWeight="700" fill={accent} textAnchor="middle">✓  compounds</text>
-        <text x="313" y="467" fontSize="9.5" fill={INK} textAnchor="middle">value lands where</text>
-        <text x="313" y="479" fontSize="9.5" fill={INK} textAnchor="middle">100% already work</text>
-      </svg>
+      {open &&
+        createPortal(
+          <div className="md:hidden fixed inset-0 z-[60] bg-black/80" role="dialog" aria-modal="true" aria-label="Strategy diagram">
+            <div ref={scrollRef} className="absolute inset-0 overflow-auto overscroll-contain" onClick={() => setOpen(false)}>
+              <div className="w-max p-4 pt-16">
+                <div className="w-[620px] rounded-xl bg-white p-4" onClick={(e) => e.stopPropagation()}>
+                  <MobileDiagram accent={accent} idPrefix="sdl" />
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="absolute top-3 right-3 rounded-full bg-black/60 p-2 text-white"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>,
+          document.body,
+        )}
     </figure>
+  )
+}
+
+function MobileDiagram({ accent, idPrefix }: { accent: string; idPrefix: string }) {
+  const accentFill = `${accent}14`
+  const accentSoft = `${accent}33`
+
+  return (
+    <svg viewBox="0 0 420 496" role="img" aria-label={ARIA} className="block w-full h-auto font-sans">
+      <defs>
+        <marker id={`${idPrefix}-ink`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill={INK} />
+        </marker>
+        <marker id={`${idPrefix}-acc`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill={accent} />
+        </marker>
+      </defs>
+
+      {/* the ask, styled like the chat-thread mockup */}
+      <rect x="78" y="12" width="250" height="58" rx="10" fill={PANEL} stroke="#d1d5db" strokeWidth="1" />
+      <circle cx="100" cy="36" r="12" fill={INK} />
+      <text x="100" y="40" fontSize="9" fontWeight="700" fill="#ffffff" textAnchor="middle">LT</text>
+      <text x="122" y="30" fontSize="11" fontWeight="700" fill={INK}>
+        Leadership <tspan fontWeight="400" fontSize="8.5" fill={MUTED}>product VP · at the start</tspan>
+      </text>
+      <text x="122" y="47" fontSize="11" fill={SUB}>Let’s get them working in our app</text>
+      <text x="122" y="61" fontSize="11" fill={SUB}>instead of elsewhere.</text>
+      <line x1="210" y1="70" x2="210" y2="88" stroke={INK} strokeWidth="1.2" markerEnd={`url(#${idPrefix}-ink)`} />
+
+      {/* goal */}
+      <rect x="85" y="94" width="250" height="52" rx="9" fill="#ffffff" stroke={INK} strokeWidth="1.4" />
+      <text x="210" y="114" fontSize="8.5" letterSpacing="1" fill={MUTED} textAnchor="middle">THE GOAL BEHIND THE ASK</text>
+      <text x="210" y="132" fontSize="11.5" fontWeight="700" fill={INK} textAnchor="middle">greater adoption → revenue</text>
+
+      {/* fork */}
+      <path d="M 210 146 C 210 160, 107 158, 107 170" fill="none" stroke={INK} strokeWidth="1.2" markerEnd={`url(#${idPrefix}-ink)`} />
+      <path d="M 210 146 C 210 160, 313 158, 313 170" fill="none" stroke={INK} strokeWidth="1.2" markerEnd={`url(#${idPrefix}-ink)`} />
+
+      {/* routes */}
+      <rect x="12" y="176" width="190" height="64" rx="9" fill="#ffffff" stroke={FAINT} strokeWidth="1.2" strokeDasharray="5 4" />
+      <text x="107" y="196" fontSize="8.5" letterSpacing="0.5" fontWeight="700" fill={RED} textAnchor="middle">THE ASSUMED ROUTE</text>
+      <text x="107" y="213" fontSize="10.5" fill={INK} textAnchor="middle">try to replace other</text>
+      <text x="107" y="227" fontSize="10.5" fill={INK} textAnchor="middle">apps’ functionality</text>
+
+      <rect x="218" y="176" width="190" height="64" rx="9" fill={accentFill} stroke={accent} strokeWidth="1.4" />
+      <text x="313" y="196" fontSize="8.5" letterSpacing="0.5" fontWeight="700" fill={accent} textAnchor="middle">THE ROUTE I ARGUED FOR</text>
+      <text x="313" y="213" fontSize="10.5" fill={INK} textAnchor="middle">fit the workflow that</text>
+      <text x="313" y="227" fontSize="10.5" fill={INK} textAnchor="middle">already exists</text>
+
+      <line x1="107" y1="240" x2="107" y2="266" stroke={INK} strokeWidth="1.2" markerEnd={`url(#${idPrefix}-ink)`} />
+      <line x1="313" y1="240" x2="313" y2="266" stroke={accent} strokeWidth="1.2" markerEnd={`url(#${idPrefix}-acc)`} />
+
+      {/* reality band */}
+      <rect x="12" y="272" width="396" height="126" rx="9" fill="#ffffff" fillOpacity="0.55" stroke={INK} strokeWidth="1.1" />
+      <text x="210" y="290" fontSize="8.5" letterSpacing="1" fill={MUTED} textAnchor="middle">REALITY CHECK: THE CLINICIAN’S DESK (MY RESEARCH)</text>
+
+      {/* spreadsheet */}
+      <rect x="28" y="300" width="82" height="50" rx="3" fill="#ffffff" stroke={INK} strokeWidth="1.1" />
+      <rect x="28" y="300" width="82" height="14" rx="3" fill={LINE} />
+      <line x1="28" y1="326" x2="110" y2="326" stroke={LINE} strokeWidth="1" />
+      <line x1="28" y1="338" x2="110" y2="338" stroke={LINE} strokeWidth="1" />
+      <line x1="55" y1="314" x2="55" y2="350" stroke={LINE} strokeWidth="1" />
+      <line x1="83" y1="314" x2="83" y2="350" stroke={LINE} strokeWidth="1" />
+
+      {/* Epic */}
+      <rect x="128" y="296" width="134" height="62" rx="4" fill="#ffffff" stroke={INK} strokeWidth="1.2" />
+      <rect x="134" y="302" width="122" height="7" rx="2" fill={LINE} />
+      <rect x="134" y="313" width="26" height="40" rx="2" fill={PANEL} />
+      <rect x="166" y="315" width="86" height="5" rx="2" fill={LINE} />
+      <rect x="166" y="324" width="70" height="5" rx="2" fill={LINE} />
+      <rect x="166" y="333" width="86" height="5" rx="2" fill={LINE} />
+      <rect x="166" y="342" width="60" height="5" rx="2" fill={LINE} />
+
+      {/* glance */}
+      <path d="M 262 302 C 274 288, 288 290, 298 306" fill="none" stroke={accent} strokeWidth="1" strokeDasharray="4 4" />
+      <polygon points="293,300 299,308 289,306" fill={accent} />
+
+      {/* our app */}
+      <rect x="286" y="310" width="92" height="48" rx="4" fill="#ffffff" stroke={accent} strokeWidth="1.3" />
+      <rect x="292" y="316" width="80" height="6" rx="2" fill={accentSoft} />
+      <rect x="292" y="326" width="80" height="8" rx="2" fill={accent} />
+      <rect x="292" y="337" width="80" height="8" rx="2" fill={accentFill} />
+      <rect x="292" y="348" width="80" height="8" rx="2" fill={accentFill} />
+
+      {/* labels */}
+      <text x="69" y="376" fontSize="9" fontWeight="700" fill={INK} textAnchor="middle">Team-lead lists</text>
+      <text x="69" y="388" fontSize="8" fill={MUTED} textAnchor="middle">Excel / Access</text>
+      <text x="195" y="376" fontSize="9" fontWeight="700" fill={INK} textAnchor="middle">Epic</text>
+      <text x="195" y="388" fontSize="8" fill={MUTED} textAnchor="middle">EHR of record · monitor 1</text>
+      <text x="332" y="376" fontSize="9" fontWeight="700" fill={accent} textAnchor="middle">our app</text>
+      <text x="332" y="388" fontSize="8" fill={MUTED} textAnchor="middle">monitor 2</text>
+
+      <line x1="107" y1="402" x2="107" y2="426" stroke={INK} strokeWidth="1.2" markerEnd={`url(#${idPrefix}-ink)`} />
+      <line x1="313" y1="402" x2="313" y2="426" stroke={accent} strokeWidth="1.2" markerEnd={`url(#${idPrefix}-acc)`} />
+
+      {/* outcomes */}
+      <rect x="12" y="432" width="190" height="56" rx="9" fill="#ffffff" stroke={RED} strokeWidth="1.3" strokeDasharray="5 4" />
+      <text x="107" y="452" fontSize="11" fontWeight="700" fill={RED} textAnchor="middle">✗  stalls</text>
+      <text x="107" y="467" fontSize="9.5" fill={SUB} textAnchor="middle">only ~20% work from</text>
+      <text x="107" y="479" fontSize="9.5" fill={SUB} textAnchor="middle">the worklist</text>
+
+      <rect x="218" y="432" width="190" height="56" rx="9" fill={accentFill} stroke={accent} strokeWidth="1.4" />
+      <text x="313" y="452" fontSize="11" fontWeight="700" fill={accent} textAnchor="middle">✓  compounds</text>
+      <text x="313" y="467" fontSize="9.5" fill={INK} textAnchor="middle">value lands where</text>
+      <text x="313" y="479" fontSize="9.5" fill={INK} textAnchor="middle">100% already work</text>
+    </svg>
   )
 }

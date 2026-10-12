@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { EyeOff, Layers, FileSpreadsheet } from "lucide-react"
 import Navbar from "@/components/navbar"
 import StrategyDiagram from "@/components/strategy-diagram"
 import DensityDiagram from "@/components/density-diagram"
 import AiProvenanceMockup from "@/components/ai-provenance-mockups"
+import TermTooltip, { TOOLTIP_BUBBLE, TOOLTIP_POINTER } from "@/components/term-tooltip"
 import { useColorContext } from "@/context/color-context"
 import "@/app/animations.css"
 import "@/styles/case-study.css"
@@ -21,21 +23,21 @@ const DEMO = {
 const FEATURES = [
   {
     number: "01",
+    title: "A hierarchy built around HCCs",
+    body: "Specialists think in HCCs, the categories that decide reimbursement. Grouping by HCC and flagging outranked categories ended review work that could never matter.",
+    image: "/3m/change-2.png",
+    imageAlt: "Diagnoses grouped under an HCC category card with status icons",
+  },
+  {
+    number: "02",
     title: "Status that can be read at a glance",
     body: "Prior-year, current-year, and billing state used to hide behind a click into every diagnosis. I tested five treatments; tinted icon chips shipped.",
     image: "/3m/change-1.png",
     imageAlt: "Tinted status icon chips showing prior-year, current-year, and billed states on a diagnosis",
   },
   {
-    number: "02",
-    title: "Grouped in the way specialists think",
-    body: "Specialists think in HCCs, the categories that decide reimbursement. Grouping by HCC and flagging outranked categories ended review work that could never matter.",
-    image: "/3m/change-2.png",
-    imageAlt: "Diagnoses grouped under an HCC category card with status icons",
-  },
-  {
     number: "03",
-    title: "Quick views from the lists teams already use",
+    title: "Quick views from existing tools",
     body: "Upload the CSV or Access export a team lead already maintains, and every specialist gets a one-click, pre-filtered worklist.",
     image: "/3m/change-3.png",
     imageAlt: "Add new quick view menu with options to create from current filters or import a patient list",
@@ -181,22 +183,25 @@ export default function ThreeMCaseStudy() {
                 <span className="w-3 h-3 rounded-full bg-[#28c840]" />
               </div>
               <div className="hidden sm:flex flex-1 justify-center">
-                <button
-                  type="button"
-                  className="group relative flex items-center gap-1.5 px-4 py-1 bg-white border border-gray-200 rounded-full text-xs text-gray-500 font-mono cursor-default transition-colors hover:border-gray-300 hover:text-gray-700"
-                >
-                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
-                    <circle cx="8" cy="8" r="6.25" stroke="currentColor" strokeWidth="1.5" />
-                    <path d="M8 7.5v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    <circle cx="8" cy="5.1" r="0.9" fill="currentColor" />
-                  </svg>
-                  interactive recreation · fictional data
-                  <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 z-30 w-72 rounded-lg bg-gray-900 px-3.5 py-2.5 text-left font-sans text-xs font-normal leading-relaxed text-gray-100 normal-case opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100">
-                    This is a working recreation I built in 2026. All patient data is fictional, and no
-                    confidential material appears in the demo.
-                    <span className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-gray-900" />
+                <span className="group relative">
+                  <button
+                    type="button"
+                    aria-describedby="demo-data-note"
+                    className="flex items-center gap-1.5 px-4 py-1 bg-white border border-gray-200 rounded-full text-xs text-gray-500 font-mono cursor-default transition-colors group-hover:border-gray-300 group-hover:text-gray-700"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
+                      <circle cx="8" cy="8" r="6.25" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M8 7.5v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                      <circle cx="8" cy="5.1" r="0.9" fill="currentColor" />
+                    </svg>
+                    interactive recreation · fictional data
+                  </button>
+                  <span aria-hidden className={TOOLTIP_POINTER} />
+                  <span id="demo-data-note" role="tooltip" className={`${TOOLTIP_BUBBLE} left-1/2 -translate-x-1/2 w-72`}>
+                    This is a working recreation I built in 2026. All patient data is fictional, and no confidential
+                    material appears in the demo.
                   </span>
-                </button>
+                </span>
               </div>
               <a
                 href={DEMO.src}
@@ -229,8 +234,8 @@ export default function ThreeMCaseStudy() {
           <div className="lg:col-span-3">
             <p className="type-eyebrow text-gray-500 mb-3">The problem</p>
             <h2 className="type-h2 mb-4">
-              AI output without information hierarchy is just more work, particularly in a complex space like
-              medical billing
+              AI output without <span style={{ color: primaryColor }}>information hierarchy</span> is just more work,
+              particularly in a complex space like medical billing
             </h2>
             <p className="type-body text-gray-600 mb-5">
               3M&apos;s AI-based HCC Management software (dating back to 2016) scans medical documentation and prior
@@ -241,28 +246,11 @@ export default function ThreeMCaseStudy() {
               Prior to the redesign I worked on, the AI just showed each finding as an identical row in a table, which
               was inefficient for medical specialists to work from.
             </p>
-            <p className="type-body text-gray-600 mb-5">
+            <p className="type-body text-gray-600">
               I worked with subject matter experts (learning the ropes how HCC medical coding works) and conducted
               contextual inquiries, shadowing medical documentation specialists to identify problems and
               opportunities.
             </p>
-            <ul className="space-y-2 type-small text-gray-600">
-              {[
-                { label: "Hidden status", text: "prior-year, current-year, and billing state sat one click deep" },
-                { label: "Wasted review", text: "no HCC grouping, so outranked categories still demanded attention" },
-                { label: "Bypassed worklist", text: "no way in for team leads' lists, so specialists stayed in Excel" },
-              ].map((item) => (
-                <li key={item.label} className="flex items-baseline gap-2.5">
-                  <span
-                    className="w-1.5 h-1.5 rounded-full shrink-0 translate-y-[-2px]"
-                    style={{ backgroundColor: primaryColor }}
-                  />
-                  <span>
-                    <span className="font-semibold text-gray-800">{item.label}:</span> {item.text}
-                  </span>
-                </li>
-              ))}
-            </ul>
           </div>
           <div className="lg:col-span-2">
             <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
@@ -276,6 +264,118 @@ export default function ThreeMCaseStudy() {
             </div>
           </div>
         </div>
+
+        {/* Problems found, one per card */}
+        <div className="relative max-w-6xl mx-auto px-6 mt-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              {
+                icon: Layers,
+                label: "Wasted review",
+                text: (
+                  <>
+                    No{" "}
+                    <TermTooltip definition="Hierarchical Condition Categories (HCCs) group related diagnoses for reimbursement. Within a hierarchy, only the most severe category counts, so the lower ones are outranked.">
+                      HCC grouping
+                    </TermTooltip>
+                    , so outranked categories still demanded attention.
+                  </>
+                ),
+              },
+              { icon: EyeOff, label: "Hidden status", text: "Prior-year, current-year, and billing state sat one click deep." },
+              {
+                icon: FileSpreadsheet,
+                label: "Tool switching",
+                text: "Specialists were spending most of their time away from our app and in other tools.",
+              },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="rounded-xl border border-gray-200 border-t-2 border-t-red-500 bg-white p-6 md:p-7"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="flex items-center justify-center w-8 h-8 rounded-full bg-red-50 text-red-600 shrink-0">
+                    <item.icon className="w-4 h-4" aria-hidden />
+                  </span>
+                  <h3 className="type-h3">{item.label}</h3>
+                </div>
+                <p className="type-small text-gray-600">{item.text}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Elbow arrow from the tool-switching card to the stakeholder section's title (desktop only).
+              Starts at the third grid column's center (gap-4 = 16px) and lands on the center of the
+              "Convincing stakeholders" eyebrow, which is ~186px wide. */}
+          <div className="hidden md:block absolute top-full inset-x-6 z-10 pointer-events-none" aria-hidden>
+            <div
+              className="absolute top-2 h-14 border-r-[1.5px] border-b-[1.5px] border-gray-300 rounded-br-2xl"
+              style={{ left: "109px", right: "calc((100% - 32px) / 6)" }}
+            />
+            <div
+              className="absolute top-[62.5px] h-[58px] w-4 border-l-[1.5px] border-t-[1.5px] border-gray-300 rounded-tl-2xl"
+              style={{ left: "93px" }}
+            />
+            {/* Arrowhead: tip sits on the line's end (y 120.5px) and its center (x 93.75px), same stroke */}
+            <svg
+              className="absolute text-gray-300"
+              style={{ left: "87.75px", top: "114.5px" }}
+              width="12"
+              height="7"
+              viewBox="0 0 12 7"
+              fill="none"
+            >
+              <path d="M0.75 0.75 6 6 11.25 0.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      {/* ========== Research insight band ========== */}
+      <section
+        className="w-full py-20 transition-colors duration-500"
+        style={{ backgroundColor: `${primaryColor}0A` }}
+      >
+        <div className="max-w-6xl mx-auto px-6">
+          {/* The reality we found: text left, ecosystem graphic right */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <p className="type-eyebrow text-gray-500 mb-3">Convincing stakeholders</p>
+              <h2 className="type-h2 mb-6">
+                The data said we weren&apos;t the main character. I made the case for us to avoid the{" "}
+                <span style={{ color: primaryColor }}>trap of doing everything</span>.
+              </h2>
+              <p className="type-body text-gray-600 mb-4">
+                Only about <em>20% of specialists</em> worked from our worklist. The rest lived in Epic, and in
+                Excel or Access lists their team leads assigned. That number, backed by what I saw at every site
+                visit, convinced leadership to stop competing for the center of the workflow.
+              </p>
+              <p className="type-body text-gray-600 mb-8">
+                So instead of replacing the lists specialists already trusted, the redesign would plug into them
+                and stay out of the way.
+              </p>
+            </div>
+            <div>
+              <Image
+                src="/3m/integrations-3.png"
+                alt="Epic at the center of the specialist's tool ecosystem, ringed by Excel, Access, and other everyday tools, with our app connected as one supporting node"
+                width={3072}
+                height={2210}
+                className="w-full h-auto"
+              />
+            </div>
+          </div>
+
+          {/* The strategy argument that made room for that reality: two routes to the same goal */}
+          <div className="mt-16 xl:-mx-12">
+            <StrategyDiagram primaryColor={primaryColor} />
+            <p className="type-caption text-gray-600 mt-6 text-center max-w-2xl mx-auto">
+              The strategy argument behind the redesign: leadership wanted us to be the main tool in the
+              clinician&apos;s ecosystem. My research showed the faster route to their own adoption goal was to be a
+              great supporting tool.
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* ========== What changed ========== */}
@@ -283,15 +383,13 @@ export default function ThreeMCaseStudy() {
         <div className="text-center max-w-3xl mx-auto mb-14">
           <p className="type-eyebrow text-gray-500 mb-3">The redesign</p>
           <h2 className="type-h2">
-            From a list to a workflow helper:
-            <br />
             Meeting clinicians where they work
           </h2>
           <p className="type-body text-gray-600 mt-4">
-            After exploring and testing prototypes with engineering stakeholders and vocal power users, I added
-            status and hierarchy to the missed diagnoses list. In addition, I pushed for smaller changes to
-            leadership in order to earn major time savings for power users while not being as costly for engineers
-            to implement.
+            After testing prototypes with engineering stakeholders and vocal power users, I gave the flat diagnosis
+            list the hierarchy it was missing: HCC grouping and status at a glance. Then, rather than competing with
+            team leads&apos; lists, I pushed leadership toward smaller changes that plug into them, earning power
+            users major time savings at a fraction of the engineering cost.
           </p>
         </div>
 
@@ -318,81 +416,37 @@ export default function ThreeMCaseStudy() {
         </div>
       </section>
 
-      {/* ========== Research insight band ========== */}
-      <section
-        className="w-full py-20 transition-colors duration-500"
-        style={{ backgroundColor: `${primaryColor}0A` }}
-      >
+      {/* ========== Two attention budgets ========== */}
+      <section className="w-full py-20 bg-gray-50 border-y border-gray-100">
         <div className="max-w-6xl mx-auto px-6">
-          {/* The reality we found: text left, ecosystem graphic right */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <p className="type-eyebrow text-gray-500 mb-3">Convincing stakeholders</p>
-              <h2 className="type-h2 mb-6">
-                The data said we weren&apos;t the main character. I made the case for us to avoid the{" "}
-                <span style={{ color: primaryColor }}>trap of doing everything</span>.
+              <p className="type-eyebrow text-gray-500 mb-3">Same AI, two contexts</p>
+              <h2 className="type-h2 mb-5">
+                Designing for different <span style={{ color: primaryColor }}>attention contexts</span>
               </h2>
               <p className="type-body text-gray-600 mb-4">
-                Only about <em>20% of specialists</em> worked from our worklist. The rest lived in Epic, and in
-                Excel or Access lists their team leads assigned. That number, backed by what I saw at every site
-                visit, convinced leadership to stop competing for the center of the workflow.
+                The worklist you just played with is a full-day professional tool, information-dense on purpose. But
+                the same AI also surfaces nudges to doctors <em>mid-visit, while a patient sits across from them</em>.
               </p>
-              <p className="type-body text-gray-600 mb-8">
-                So the redesign meets specialists where they already work. Quick views ingest those lists, and the
-                pager keeps them moving through one.
+              <p className="type-body text-gray-600">
+                I led both ends: a compact desktop widget that earns a glance without competing with the patient, and
+                the dense review workspace it hands off to. Same engine, opposite information densities, because the
+                attention economics of the two users are opposite.
               </p>
             </div>
             <div>
-              <Image
-                src="/3m/integrations-3.png"
-                alt="Epic at the center of the specialist's tool ecosystem, ringed by Excel, Access, and other everyday tools, with our app connected as one supporting node"
-                width={3072}
-                height={2210}
-                className="w-full h-auto"
-              />
+              <DensityDiagram primaryColor={primaryColor} />
             </div>
-          </div>
-
-          {/* The strategy argument that made room for that reality: two routes to the same goal */}
-          <div className="mt-16 xl:-mx-12">
-            <StrategyDiagram primaryColor={primaryColor} />
-            <p className="type-caption text-gray-600 mt-6 text-center max-w-2xl mx-auto">
-              The strategy argument behind the redesign: leadership wanted us to be the main tool in the
-              clinician&apos;s ecosystem. My research showed the faster route to their own adoption goal was to be a
-              great supporting tool.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ========== Two attention budgets ========== */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <p className="type-eyebrow text-gray-500 mb-3">Same AI, two contexts</p>
-            <h2 className="type-h2 mb-5">
-              Specialists get all day.
-              <br />
-              Doctors get <span style={{ color: primaryColor }}>five seconds.</span>
-            </h2>
-            <p className="type-body text-gray-600 mb-4">
-              The worklist you just played with is a full-day professional tool, information-dense on purpose. But
-              the same AI also surfaces nudges to doctors <em>mid-visit, while a patient sits across from them</em>.
-            </p>
-            <p className="type-body text-gray-600">
-              I led both ends: a compact desktop widget that earns a glance without competing with the patient, and
-              the dense review workspace it hands off to. Same engine, opposite information densities, because the
-              attention economics of the two users are opposite.
-            </p>
-          </div>
-          <div>
-            <DensityDiagram primaryColor={primaryColor} />
           </div>
         </div>
       </section>
 
       {/* ========== AI trust iterations ========== */}
-      <section className="w-full py-20 bg-gray-50 border-y border-gray-100">
+      <section
+        className="w-full py-20 transition-colors duration-500"
+        style={{ backgroundColor: `${primaryColor}0A` }}
+      >
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <p className="type-eyebrow text-gray-500 mb-3">The hardest call</p>
