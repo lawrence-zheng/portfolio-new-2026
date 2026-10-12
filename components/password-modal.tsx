@@ -51,7 +51,7 @@ export default function PasswordModal({ project, onClose, onUnlock }: PasswordMo
         <DialogPrimitive.Content className="fixed inset-0 z-50 m-auto grid h-fit w-[calc(100%-2rem)] max-w-md gap-6 rounded-md border border-gray-200 bg-white p-8 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0">
           <div>
             <p
-              className="font-sans text-xs font-medium uppercase tracking-[0.15em] mb-2 inline-flex items-center gap-1.5"
+              className="type-eyebrow mb-2 inline-flex items-center gap-1.5"
               style={{ color: primaryColor }}
             >
               <svg
@@ -71,10 +71,10 @@ export default function PasswordModal({ project, onClose, onUnlock }: PasswordMo
               </svg>
               Password required{project?.company ? ` · ${project.company}` : ""}
             </p>
-            <DialogTitle className="font-serif font-normal tracking-tight normal-case text-balance text-2xl md:text-[1.75rem] leading-tight text-black">
+            <DialogTitle className="type-h2 text-black">
               {project?.title}
             </DialogTitle>
-            <DialogDescription className="font-sans text-base leading-relaxed text-gray-700 mt-3">
+            <DialogDescription className="type-body text-gray-700 mt-3">
               Enter the password to view this case study.
             </DialogDescription>
           </div>
@@ -98,7 +98,7 @@ export default function PasswordModal({ project, onClose, onUnlock }: PasswordMo
                 autoFocus
                 required
               />
-              {error && <p className="mt-2 font-sans text-sm text-red-600">{error}</p>}
+              {error && <p className="mt-2 type-caption text-red-600">{error}</p>}
             </div>
 
             <button

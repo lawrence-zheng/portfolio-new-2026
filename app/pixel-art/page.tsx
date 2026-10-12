@@ -27,7 +27,7 @@ export default function PixelArtPage() {
     {
       id: "beach-scene",
       title: "Seaside Contemplation",
-      description: "A tranquil beach scene with gentle waves and a solitary figure taking in the view.",
+      description: "Me sitting at a beach",
       imageUrl: "/pixel-art/beach-scene.png",
       category: "Landscapes",
       size: { width: 720, height: 405 },
@@ -36,7 +36,7 @@ export default function PixelArtPage() {
     {
       id: "comfort-food",
       title: "Comfort Food",
-      description: "A nostalgic still life featuring instant noodles and a soda - the perfect late-night comfort meal.",
+      description: "My go-to college meal for when I was lazy to cook. I love spicy food so I have a soft spot for Shin Ramyun.",
       imageUrl: "/pixel-art/comfort-food.png",
       category: "Still Life",
       size: { width: 320, height: 320 },
@@ -45,7 +45,7 @@ export default function PixelArtPage() {
     {
       id: "salmon-don",
       title: "Salmon Don",
-      description: "A mouthwatering bowl of salmon and roe, meticulously rendered in pixel art form.",
+      description: "Salmon poke don",
       imageUrl: "/pixel-art/salmon-don.png",
       category: "Food",
       size: { width: 320, height: 320 },
@@ -54,8 +54,7 @@ export default function PixelArtPage() {
     {
       id: "five-spice",
       title: "Five Spice",
-      description:
-        "An arrangement of aromatic spices including star anise, cinnamon, and other components of the classic five-spice blend.",
+      description: "Chinese five spice",
       imageUrl: "/pixel-art/five-spice.png",
       category: "Food",
       size: { width: 320, height: 320 },
@@ -64,7 +63,7 @@ export default function PixelArtPage() {
     {
       id: "schenley-fall",
       title: "Autumn Building",
-      description: "A charming building framed by trees with brilliant orange autumn foliage against a blue sky.",
+      description: "Schenley Park in Pittsburgh, PA. I stayed in Pittsburgh for most of my twenties so it's a place I hold dear.",
       imageUrl: "/pixel-art/schenley-fall.png",
       category: "Seasonal",
       size: { width: 640, height: 480 },
@@ -74,7 +73,7 @@ export default function PixelArtPage() {
     {
       id: "evening-drive",
       title: "Evening Drive",
-      description: "A moody nighttime cityscape with cars navigating through an urban landscape under a purple sky.",
+      description: "City night scene",
       imageUrl: "/pixel-art/evening-drive.png",
       category: "Urban",
       size: { width: 480, height: 480 },
@@ -83,8 +82,7 @@ export default function PixelArtPage() {
     {
       id: "symbiotic",
       title: "Symbiotic",
-      description:
-        "A mystical creature intertwined with ethereal energy, representing the balance between darkness and light.",
+      description: "Wolf/dragon. Done for a Pixel Dailies challenge with the theme \"symbiosis\"",
       imageUrl: "/pixel-art/symbiotic.png",
       category: "Fantasy",
       size: { width: 320, height: 320 },
@@ -93,7 +91,7 @@ export default function PixelArtPage() {
     {
       id: "flame-torch",
       title: "Flame Torch",
-      description: "A flickering torch casting warm light, perfect for illuminating dark dungeons or ancient temples.",
+      description: "Animation practice",
       imageUrl: "/pixel-art/flame-torch.gif",
       category: "Fantasy",
       size: { width: 320, height: 320 },
@@ -102,8 +100,7 @@ export default function PixelArtPage() {
     {
       id: "office-coffee",
       title: "Office View",
-      description:
-        "A minimalist office space with high chairs, plants, and a steaming coffee cup overlooking the city.",
+      description: "The office lounge at one of my college internships, back when I was doing data work",
       imageUrl: "/pixel-art/office-coffee.gif",
       category: "Interior",
       size: { width: 640, height: 360 },
@@ -112,8 +109,7 @@ export default function PixelArtPage() {
     {
       id: "choi-hung",
       title: "Choi Hung Estate",
-      description:
-        "The iconic colorful apartment building in Hong Kong with its basketball court, complete with coordinates.",
+      description: "Choi Hung Estate in Hong Kong. I would pass by a lot since it was close to where I had to transfer via bus. I drew this after being sad about it being planned for demolition starting 2028, so this is a sort of tribute.",
       imageUrl: "/pixel-art/choi-hung.png",
       category: "Urban",
       size: { width: 640, height: 480 },
@@ -123,7 +119,7 @@ export default function PixelArtPage() {
     {
       id: "autumn-bonfire",
       title: "Autumn Bonfire",
-      description: "Vibrant autumn leaves surround a cozy campfire, capturing the essence of fall evenings.",
+      description: "Another fall scene, animation practice. I like how the bonfire turned out more than the leaves",
       imageUrl: "/pixel-art/autumn-bonfire.gif",
       category: "Seasonal",
       size: { width: 480, height: 480 },
@@ -132,8 +128,7 @@ export default function PixelArtPage() {
     {
       id: "pagoda",
       title: "Hilltop Pagoda",
-      description:
-        "A traditional pagoda pavilion perched on a hillside, offering panoramic views of the landscape below.",
+      description: "Pagoda, one of my first pixel art drawings",
       imageUrl: "/pixel-art/pagoda.png",
       category: "Architecture",
       size: { width: 480, height: 480 },
@@ -150,20 +145,17 @@ export default function PixelArtPage() {
     setIsLightboxOpen(false)
   }
 
+  // The lightbox steps through pieces in the order the gallery grid shows them, not array order
+  const displayOrder = ["beach-scene", "comfort-food", "salmon-don", "five-spice", "flame-torch", "schenley-fall", "office-coffee", "evening-drive", "symbiotic", "autumn-bonfire", "pagoda", "choi-hung"]
+  const displayIndex = selectedImage ? displayOrder.indexOf(selectedImage.id) : -1
+
   const navigateImage = (direction: "next" | "prev") => {
-    if (!selectedImage) return
+    if (displayIndex === -1) return
 
-    const currentIndex = pixelArtItems.findIndex((item) => item.id === selectedImage.id)
-    if (currentIndex === -1) return
-
-    let newIndex
-    if (direction === "next") {
-      newIndex = (currentIndex + 1) % pixelArtItems.length
-    } else {
-      newIndex = (currentIndex - 1 + pixelArtItems.length) % pixelArtItems.length
-    }
-
-    setSelectedImage(pixelArtItems[newIndex])
+    const step = direction === "next" ? 1 : -1
+    const nextId = displayOrder[(displayIndex + step + displayOrder.length) % displayOrder.length]
+    const next = pixelArtItems.find((item) => item.id === nextId)
+    if (next) setSelectedImage(next)
   }
 
   // Get background gradient based on active tab
@@ -198,7 +190,7 @@ export default function PixelArtPage() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-6 relative" style={{ background: getBackgroundGradient() }}>
+      <section className="pt-24 pb-10 relative" style={{ background: getBackgroundGradient() }}>
         <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="max-w-5xl mx-auto px-6 h-full relative pointer-events-none">
             {/* Pixel Art Decorations */}
@@ -241,10 +233,10 @@ export default function PixelArtPage() {
 
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-5xl md:text-6xl font-sans font-bold mb-4 normal-case" style={{ color: primaryColor }}>
+            <h1 className="type-h1 mb-6" style={{ color: primaryColor }}>
               My pixel art
             </h1>
-            <p className="text-gray-700 mb-8 max-w-2xl mx-auto">
+            <p className="type-body text-gray-700 max-w-2xl mx-auto">
               I enjoy drawing pixel art as a creative outlet. I've added it to my portfolio as a way of showing the
               human behind the designer—a gamer who loves the nostalgia that pixel art evokes, and also loves the
               challenge of creating scenes with a limited canvas.
@@ -253,27 +245,8 @@ export default function PixelArtPage() {
         </div>
       </section>
 
-      {/* Video Demo Section */}
-      <section className="py-4">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-center">
-            <div className="w-[80px] h-[80px] rounded-xl overflow-hidden flex items-center justify-center">
-              <video
-                src="/pixel-art-demo.mp4"
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full h-full object-cover"
-                aria-label="Pixel art animation demo"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Gallery Section */}
-      <section className="py-8">
+      <section className="pb-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {/* Row 1 */}
@@ -435,7 +408,7 @@ export default function PixelArtPage() {
 
       {/* Custom Lightbox */}
       {isLightboxOpen && selectedImage && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" onClick={closeLightbox}>
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center" onClick={closeLightbox}>
           <div
             className="relative max-w-5xl w-full h-full flex flex-col items-center justify-center px-4"
             onClick={(e) => e.stopPropagation()}
@@ -463,12 +436,18 @@ export default function PixelArtPage() {
             </button>
 
             {/* Image container */}
-            <div className="relative flex-1 w-full flex items-center justify-center">
+            <div className="relative flex-1 w-full flex flex-col items-center justify-center gap-5">
               <img
                 src={selectedImage.imageUrl || "/placeholder.svg"}
                 alt={selectedImage.title}
-                className="max-h-[70vh] max-w-full object-contain"
+                className="max-h-[65vh] max-w-full object-contain"
               />
+              <div className="max-w-2xl px-2 md:px-12 text-center">
+                <p className="type-body text-white">{selectedImage.description}</p>
+                <p className="type-caption text-white/60 mt-2">
+                  {displayIndex + 1} / {displayOrder.length}
+                </p>
+              </div>
             </div>
 
             {/* Navigation arrows */}
@@ -517,11 +496,6 @@ export default function PixelArtPage() {
                 <polyline points="9 18 15 12 9 6"></polyline>
               </svg>
             </button>
-
-            {/* Counter */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white/80 text-sm">
-              {pixelArtItems.findIndex((item) => item.id === selectedImage.id) + 1} / {pixelArtItems.length}
-            </div>
           </div>
         </div>
       )}

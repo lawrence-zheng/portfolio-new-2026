@@ -24,6 +24,19 @@ const config = {
         sans: ["Source Sans Pro", "sans-serif"],
         serif: ["Source Serif Pro", "serif"],
       },
+      // Type scale: a ~1.25 ratio off an 18px body. Headings scale fluidly between a
+      // phone and a ~1100px viewport; tracking tightens as size grows. Use the
+      // .type-* classes in globals.css rather than these tokens directly.
+      fontSize: {
+        h1: ["clamp(2.5rem, 1.75rem + 2.5vw, 3.5rem)", { lineHeight: "1.1", letterSpacing: "-0.02em" }],
+        h2: ["clamp(1.75rem, 1.375rem + 1.25vw, 2.25rem)", { lineHeight: "1.2", letterSpacing: "-0.015em" }],
+        h3: ["clamp(1.25rem, 1.0625rem + 0.625vw, 1.5rem)", { lineHeight: "1.3", letterSpacing: "-0.01em" }],
+        h4: ["1.125rem", { lineHeight: "1.4", letterSpacing: "0" }],
+        body: ["clamp(1.0625rem, 1rem + 0.25vw, 1.125rem)", { lineHeight: "1.6", letterSpacing: "0" }],
+        small: ["1rem", { lineHeight: "1.55", letterSpacing: "0" }],
+        caption: ["0.875rem", { lineHeight: "1.45", letterSpacing: "0" }],
+        eyebrow: ["0.8125rem", { lineHeight: "1.2", letterSpacing: "0.08em" }],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

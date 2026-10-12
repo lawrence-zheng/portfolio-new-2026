@@ -166,7 +166,7 @@ export default function AboutMe() {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
       {/* Section heading with character status bars */}
       <div className="lg:col-span-3 lg:pt-10">
-        <h2 className="text-3xl md:text-4xl font-serif font-normal tracking-tight normal-case mb-4">About me</h2>
+        <h2 className="type-h2 mb-4">About me</h2>
         <div className="flex items-center gap-3 flex-wrap">
           <Image
             src="/about-me/hp-bar.png"
@@ -187,7 +187,7 @@ export default function AboutMe() {
 
       {/* Trait selector - 3x3 grid; the selected icon gets a bordered plate */}
       <div className="lg:col-span-4">
-        <p className="font-sans text-xs font-medium uppercase tracking-[0.15em] text-gray-500 mb-3 text-center lg:text-left">
+        <p className="type-eyebrow text-gray-500 mb-3 text-center lg:text-left">
           Select a trait
         </p>
         <div className="grid grid-cols-3 gap-2 w-fit mx-auto lg:mx-0" role="tablist" aria-label="Traits">
@@ -234,12 +234,12 @@ export default function AboutMe() {
           }}
         >
           <h3
-            className="text-2xl md:text-3xl font-serif font-normal tracking-tight mb-4 normal-case transition-colors duration-300"
+            className="type-h3 mb-4 transition-colors duration-300"
             style={{ color: primaryColor }}
           >
             {displayed.title}
           </h3>
-          <p className="text-gray-700 font-sans text-base leading-relaxed">{displayed.body}</p>
+          <p className="type-body text-gray-700">{displayed.body}</p>
         </div>
       </div>
     </div>

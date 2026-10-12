@@ -1,12 +1,12 @@
 "use client"
 
-import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import Navbar from "@/components/navbar"
 import StrategyDiagram from "@/components/strategy-diagram"
 import DensityDiagram from "@/components/density-diagram"
+import AiProvenanceMockup from "@/components/ai-provenance-mockups"
 import { useColorContext } from "@/context/color-context"
 import "@/app/animations.css"
 import "@/styles/case-study.css"
@@ -21,23 +21,20 @@ const DEMO = {
 const FEATURES = [
   {
     number: "01",
-    context: "Attention context",
-    title: "Status you can read at a glance",
+    title: "Status that can be read at a glance",
     body: "Prior-year, current-year, and billing state used to hide behind a click into every diagnosis. I tested five treatments; tinted icon chips shipped.",
     image: "/3m/change-1.png",
     imageAlt: "Tinted status icon chips showing prior-year, current-year, and billed states on a diagnosis",
   },
   {
     number: "02",
-    context: "Billing context",
-    title: "Grouped the way billing works",
+    title: "Grouped in the way specialists think",
     body: "Specialists think in HCCs, the categories that decide reimbursement. Grouping by HCC and flagging outranked categories ended review work that could never matter.",
     image: "/3m/change-2.png",
     imageAlt: "Diagnoses grouped under an HCC category card with status icons",
   },
   {
     number: "03",
-    context: "Workflow context",
     title: "Quick views from the lists teams already use",
     body: "Upload the CSV or Access export a team lead already maintains, and every specialist gets a one-click, pre-filtered worklist.",
     image: "/3m/change-3.png",
@@ -45,7 +42,6 @@ const FEATURES = [
   },
   {
     number: "04",
-    context: "Flow context",
     title: "Stay in flow across a patient list",
     body: "A sticky pager (“Reviewing 1 of 5 patients”) moves straight to the next chart. No round-trips to the worklist between patients.",
     image: "/3m/change-4.png",
@@ -133,12 +129,6 @@ export default function ThreeMCaseStudy() {
     }
   }
 
-  const scrollTo = (ref: React.RefObject<HTMLDivElement | null>) => {
-    if (ref.current) {
-      window.scrollTo({ top: ref.current.offsetTop - 72, behavior: "smooth" })
-    }
-  }
-
   return (
     <main className="min-h-screen bg-white text-black">
       <style jsx global>
@@ -155,64 +145,28 @@ export default function ThreeMCaseStudy() {
           {/* Project chip */}
           <div className="inline-flex items-center gap-2.5 bg-white/80 backdrop-blur border border-gray-200 px-4 py-1.5 rounded-full mb-8 fade-in">
             <Image src="/3M_wordmark.svg" alt="3M logo" width={32} height={14} className="h-3.5 w-auto" />
-            <span className="text-sm text-gray-600 font-sans">M*Modal · Enterprise healthcare AI · 2 years</span>
+            <span className="type-caption text-gray-600">M*Modal · Enterprise healthcare AI · 2 years</span>
           </div>
 
-          <h1 className="font-serif font-normal tracking-tight normal-case mb-6 fade-in">
-            <span className="block text-3xl md:text-4xl lg:text-5xl leading-tight mb-1">
+          <h1 className="type-h1 mb-6 fade-in">
+            <span className="block">
               3M&apos;s AI had the answers.
             </span>
-            <span className="block text-3xl md:text-4xl lg:text-5xl leading-tight">
+            <span className="block">
               Clinicians had a workflow.
             </span>
             <span
-              className="block mt-4 text-xl md:text-2xl lg:text-3xl leading-snug"
+              className="block mt-4 type-h2"
               style={{ color: primaryColor }}
             >
               I designed where the two meet.
             </span>
           </h1>
 
-          <p className="text-gray-800 font-sans text-base md:text-lg max-w-2xl mb-8 fade-in">
-            3M M*Modal&apos;s AI could catch missed diagnoses worth real revenue, but its raw output arrived with no
-            sense of how billing works, where worklists actually live, or how much attention a clinician has to
-            spare. As the suite&apos;s sole designer, I redesigned the review experience around those realities —
-            recreated below as a working product you can click through.
+          <p className="type-body text-gray-700 max-w-2xl mb-12 fade-in">
+            After I redesigned how clinicians review its suggestions, 3M&apos;s AI saw 25% more of its flagged
+            diagnoses accepted, recovering millions of dollars more in missed billing.
           </p>
-
-          <div className="flex flex-wrap justify-center gap-4 mb-12 fade-in">
-            <button
-              onClick={() => scrollTo(demoRef)}
-              className="px-6 py-3 text-white rounded-md font-medium hover:opacity-90 transition-colors"
-              style={{ backgroundColor: primaryColor }}
-            >
-              Play with the demo
-            </button>
-            <button
-              onClick={() => scrollTo(changesRef)}
-              className="px-6 py-3 border rounded-md font-medium bg-white/60 hover:bg-white transition-colors"
-              style={{ borderColor: primaryColor, color: primaryColor }}
-            >
-              See what changed
-            </button>
-          </div>
-
-          {/* Stat strip */}
-          <div className="flex flex-wrap justify-center items-center gap-x-10 gap-y-4 fade-in">
-            {[
-              { value: "+25%", label: "diagnosis capture" },
-              { value: "250,000+", label: "clinicians served" },
-              { value: "1 of 30", label: "only designer on the team" },
-              { value: "5", label: "health systems researched" },
-            ].map((s, i) => (
-              <div key={i} className="flex items-baseline gap-2">
-                <span className="font-serif text-2xl md:text-3xl font-medium" style={{ color: primaryColor }}>
-                  {s.value}
-                </span>
-                <span className="text-sm text-gray-600 font-sans">{s.label}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* ========== Playground (overlapping hero fade) ========== */}
@@ -273,17 +227,26 @@ export default function ThreeMCaseStudy() {
       <section className="w-full py-14 bg-gray-50 border-y border-gray-100">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-5 gap-10 items-center">
           <div className="lg:col-span-3">
-            <div className="section-subtitle mb-3 text-left">
-              <span className="uppercase">The problem</span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-serif font-normal tracking-tight leading-[1.45] normal-case mb-4">
-              Every answer the AI found arrived looking exactly the same.
+            <p className="type-eyebrow text-gray-500 mb-3">The problem</p>
+            <h2 className="type-h2 mb-4">
+              AI output without information hierarchy is just more work, particularly in a complex space like
+              medical billing
             </h2>
-            <p className="text-gray-600 font-sans mb-5">
-              The legacy screen rendered each finding as an identical row: a code, a source note, a date. Everything
-              a specialist needed to decide was a click away — per diagnosis, per patient, all day.
+            <p className="type-body text-gray-600 mb-5">
+              3M&apos;s AI-based HCC Management software (dating back to 2016) scans medical documentation and prior
+              billing to identify evidence of missed diagnoses. The evidence is reviewed by specialists before being
+              forwarded to doctors.
             </p>
-            <ul className="space-y-2 text-gray-600 font-sans text-[15px]">
+            <p className="type-body text-gray-600 mb-5">
+              Prior to the redesign I worked on, the AI just showed each finding as an identical row in a table, which
+              was inefficient for medical specialists to work from.
+            </p>
+            <p className="type-body text-gray-600 mb-5">
+              I worked with subject matter experts (learning the ropes how HCC medical coding works) and conducted
+              contextual inquiries, shadowing medical documentation specialists to identify problems and
+              opportunities.
+            </p>
+            <ul className="space-y-2 type-small text-gray-600">
               {[
                 { label: "Hidden status", text: "prior-year, current-year, and billing state sat one click deep" },
                 { label: "Wasted review", text: "no HCC grouping, so outranked categories still demanded attention" },
@@ -317,16 +280,18 @@ export default function ThreeMCaseStudy() {
 
       {/* ========== What changed ========== */}
       <section ref={changesRef} id="changes" className="max-w-6xl mx-auto px-6 py-20 scroll-mt-20">
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="section-subtitle mb-3">
-            <span className="uppercase">What changed</span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-serif font-normal tracking-tight leading-[1.45] normal-case">
-            Four changes carry the redesign
+        <div className="text-center max-w-3xl mx-auto mb-14">
+          <p className="type-eyebrow text-gray-500 mb-3">The redesign</p>
+          <h2 className="type-h2">
+            From a list to a workflow helper:
+            <br />
+            Meeting clinicians where they work
           </h2>
-          <p className="text-gray-600 font-sans mt-4">
-            Each one restores a context the raw AI output ignored and traces to something a specialist did in
-            front of me, not something a stakeholder said.
+          <p className="type-body text-gray-600 mt-4">
+            After exploring and testing prototypes with engineering stakeholders and vocal power users, I added
+            status and hierarchy to the missed diagnoses list. In addition, I pushed for smaller changes to
+            leadership in order to earn major time savings for power users while not being as costly for engineers
+            to implement.
           </p>
         </div>
 
@@ -344,12 +309,9 @@ export default function ThreeMCaseStudy() {
                   <span className="font-mono text-xs font-semibold" style={{ color: primaryColor }}>
                     {f.number}
                   </span>
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-gray-500">
-                    {f.context}
-                  </span>
+                  <h3 className="type-h3">{f.title}</h3>
                 </div>
-                <h3 className="text-xl font-sans font-bold mb-2 normal-case">{f.title}</h3>
-                <p className="text-gray-600 font-sans text-[15px] leading-relaxed">{f.body}</p>
+                <p className="type-small text-gray-600">{f.body}</p>
               </div>
             </div>
           ))}
@@ -365,19 +327,17 @@ export default function ThreeMCaseStudy() {
           {/* The reality we found: text left, ecosystem graphic right */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="section-subtitle mb-3 text-left">
-                <span className="uppercase">Convincing stakeholders</span>
-              </div>
-              <p className="font-serif text-2xl md:text-3xl leading-[1.45] normal-case text-gray-900 mb-6">
+              <p className="type-eyebrow text-gray-500 mb-3">Convincing stakeholders</p>
+              <h2 className="type-h2 mb-6">
                 The data said we weren&apos;t the main character. I made the case for us to avoid the{" "}
                 <span style={{ color: primaryColor }}>trap of doing everything</span>.
-              </p>
-              <p className="text-gray-600 font-sans mb-4">
+              </h2>
+              <p className="type-body text-gray-600 mb-4">
                 Only about <em>20% of specialists</em> worked from our worklist. The rest lived in Epic, and in
                 Excel or Access lists their team leads assigned. That number, backed by what I saw at every site
                 visit, convinced leadership to stop competing for the center of the workflow.
               </p>
-              <p className="text-gray-600 font-sans mb-8">
+              <p className="type-body text-gray-600 mb-8">
                 So the redesign meets specialists where they already work. Quick views ingest those lists, and the
                 pager keeps them moving through one.
               </p>
@@ -396,7 +356,7 @@ export default function ThreeMCaseStudy() {
           {/* The strategy argument that made room for that reality: two routes to the same goal */}
           <div className="mt-16 xl:-mx-12">
             <StrategyDiagram primaryColor={primaryColor} />
-            <p className="text-sm text-gray-600 font-sans mt-6 text-center max-w-2xl mx-auto">
+            <p className="type-caption text-gray-600 mt-6 text-center max-w-2xl mx-auto">
               The strategy argument behind the redesign: leadership wanted us to be the main tool in the
               clinician&apos;s ecosystem. My research showed the faster route to their own adoption goal was to be a
               great supporting tool.
@@ -409,19 +369,17 @@ export default function ThreeMCaseStudy() {
       <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="section-subtitle mb-3 text-left">
-              <span className="uppercase">Same AI, two contexts</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-serif font-normal tracking-tight leading-[1.45] normal-case mb-5">
+            <p className="type-eyebrow text-gray-500 mb-3">Same AI, two contexts</p>
+            <h2 className="type-h2 mb-5">
               Specialists get all day.
               <br />
               Doctors get <span style={{ color: primaryColor }}>five seconds.</span>
             </h2>
-            <p className="text-gray-600 font-sans mb-4">
+            <p className="type-body text-gray-600 mb-4">
               The worklist you just played with is a full-day professional tool, information-dense on purpose. But
               the same AI also surfaces nudges to doctors <em>mid-visit, while a patient sits across from them</em>.
             </p>
-            <p className="text-gray-600 font-sans">
+            <p className="type-body text-gray-600">
               I led both ends: a compact desktop widget that earns a glance without competing with the patient, and
               the dense review workspace it hands off to. Same engine, opposite information densities, because the
               attention economics of the two users are opposite.
@@ -437,13 +395,11 @@ export default function ThreeMCaseStudy() {
       <section className="w-full py-20 bg-gray-50 border-y border-gray-100">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <div className="section-subtitle mb-3">
-              <span className="uppercase">The hardest call</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-serif font-normal tracking-tight leading-[1.45] normal-case">
+            <p className="type-eyebrow text-gray-500 mb-3">The hardest call</p>
+            <h2 className="type-h2">
               How loudly should the AI announce itself?
             </h2>
-            <p className="text-gray-600 font-sans mt-4">
+            <p className="type-body text-gray-600 mt-4">
               Meeting clinicians where they are includes their trust posture. Doctors asked us to label what the AI
               found versus what humans found. Too loud, and they dismissed the AI wholesale. Too quiet, and they
               couldn&apos;t calibrate trust. I tested three levels:
@@ -453,7 +409,7 @@ export default function ThreeMCaseStudy() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                image: "/3m/iterA.png",
+                variant: "separate" as const,
                 alt: "Iteration A: separate AI evidence section",
                 title: "A · Separate AI section",
                 body: "Doctors disregarded AI content entirely. Hard separation turned into bias against the machine.",
@@ -461,7 +417,7 @@ export default function ThreeMCaseStudy() {
                 pass: false,
               },
               {
-                image: "/3m/iterB.png",
+                variant: "icon" as const,
                 alt: "Iteration B: icon marking AI-found items",
                 title: "B · Icon on AI items",
                 body: "Fewer dismissals, but the icon needed training to understand and collided with existing icons.",
@@ -469,7 +425,7 @@ export default function ThreeMCaseStudy() {
                 pass: false,
               },
               {
-                image: "/3m/iterC.png",
+                variant: "italic" as const,
                 alt: "Iteration C: italic text for AI-found items",
                 title: "C · Italics for AI items",
                 body: "Subtle provenance. Power users could read the source; nobody was dissuaded from acting.",
@@ -483,18 +439,12 @@ export default function ThreeMCaseStudy() {
                   it.pass ? "border-green-200 shadow-lg" : "border-gray-200"
                 }`}
               >
-                <div className="h-56 flex items-center justify-center bg-white border-b border-gray-100 p-6">
-                  <Image
-                    src={it.image}
-                    alt={it.alt}
-                    width={717}
-                    height={833}
-                    className="h-full w-auto object-contain"
-                  />
+                <div className="h-56 flex items-center justify-center bg-gray-50 border-b border-gray-100 px-5">
+                  <AiProvenanceMockup variant={it.variant} label={it.alt} />
                 </div>
                 <div className="p-6">
                   <div className="flex items-center justify-between gap-3 mb-2">
-                    <h3 className="text-lg font-sans font-bold normal-case">{it.title}</h3>
+                    <h3 className="type-h3">{it.title}</h3>
                     <span
                       className={`text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0 ${
                         it.pass ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-500"
@@ -503,13 +453,13 @@ export default function ThreeMCaseStudy() {
                       {it.verdict}
                     </span>
                   </div>
-                  <p className="text-gray-600 font-sans text-[15px] leading-relaxed">{it.body}</p>
+                  <p className="type-small text-gray-600">{it.body}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          <p className="text-center font-serif text-xl md:text-2xl leading-[1.45] text-gray-800 normal-case max-w-2xl mx-auto mt-12">
+          <p className="type-h3 text-center text-gray-900 max-w-2xl mx-auto mt-12">
             The middle ground existed. Finding it took <span style={{ color: primaryColor }}>behavioral evidence</span>,
             not opinion.
           </p>
@@ -525,7 +475,7 @@ export default function ThreeMCaseStudy() {
         >
           &ldquo;
         </div>
-        <blockquote className="font-serif text-2xl md:text-3xl leading-[1.45] normal-case text-gray-900 mb-8">
+        <blockquote className="type-h2 text-gray-900 mb-8">
           The new 3M redesign is a lot better to look at compared to the old design. It has been{" "}
           <span style={{ color: primaryColor }}>much easier for the team to prioritize</span> what to work on.
         </blockquote>
@@ -534,20 +484,19 @@ export default function ThreeMCaseStudy() {
             className="w-1.5 h-1.5 rounded-full shrink-0"
             style={{ backgroundColor: primaryColor }}
           />
-          <cite className="not-italic text-sm text-gray-600 font-sans">
+          <cite className="not-italic type-caption text-gray-600">
             CDI team · Lehigh Valley Health Network
           </cite>
         </div>
-        <p className="text-gray-600 font-sans">
-          Shipped with 3M messaging, this work contributed to a <em>25% lift in chronic-condition diagnosis capture</em>, the{" "}
-          documentation that decides how hospitals are reimbursed for the care they already give.
+        <p className="type-body text-gray-600">
+          This work contributed to a <em>25% lift in chronic-condition diagnosis capture</em>, recovering millions of
+          dollars in missed diagnoses and contributing to 3M retaining major contracts from large world-class
+          healthcare organizations.
         </p>
 
         {/* Adoption showcase */}
         <div className="mt-12">
-          <div className="section-subtitle mb-6">
-            <span className="uppercase">Widespread adoption at</span>
-          </div>
+          <p className="type-eyebrow text-gray-500 mb-6">Widespread adoption at</p>
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
             <Image
               src="/3m/logos/lvhn.png"
@@ -584,10 +533,8 @@ export default function ThreeMCaseStudy() {
       {/* ========== Learnings ========== */}
       <section className="max-w-6xl mx-auto px-6 pb-20">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <div className="section-subtitle mb-3">
-            <span className="uppercase">Learnings</span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-serif font-normal tracking-tight leading-[1.45] normal-case">
+          <p className="type-eyebrow text-gray-500 mb-3">Learnings</p>
+          <h2 className="type-h2">
             Three things 3M taught me
           </h2>
         </div>
@@ -618,8 +565,8 @@ export default function ThreeMCaseStudy() {
               <div className="font-mono text-xs font-semibold mb-3" style={{ color: primaryColor }}>
                 {l.n}
               </div>
-              <h3 className="text-xl font-serif font-normal normal-case mb-2" style={{ letterSpacing: "-0.025em" }}>{l.title}</h3>
-              <p className="text-gray-600 font-sans text-[15px] leading-relaxed">{l.body}</p>
+              <h3 className="type-h3 mb-2">{l.title}</h3>
+              <p className="type-small text-gray-600">{l.body}</p>
               {l.n === "03" && (
                 <div
                   className="mt-5 w-full h-36 md:mt-0 md:absolute md:-bottom-12 md:-right-3 md:w-56 md:h-[120px] rounded-md overflow-hidden bg-white p-1 shadow-lg"
@@ -646,10 +593,10 @@ export default function ThreeMCaseStudy() {
           className="rounded-2xl px-8 py-14 text-center text-white transition-colors duration-500"
           style={{ backgroundColor: primaryColor }}
         >
-          <h2 className="font-serif text-3xl md:text-4xl font-normal leading-[1.45] normal-case mb-4">
+          <h2 className="type-h2 mb-4">
             Liked poking around the demo?
           </h2>
-          <p className="font-sans text-white/85 max-w-xl mx-auto mb-8">
+          <p className="type-body text-white/85 max-w-xl mx-auto mb-8">
             There&apos;s more where that came from. Or reach out and I&apos;ll walk you through the decisions behind
             it.
           </p>

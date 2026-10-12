@@ -47,15 +47,14 @@ export default function Footer() {
 
             {/* Title */}
             <h2
-              className="text-3xl font-medium text-gray-800 mb-6"
-              style={{ textTransform: "none", letterSpacing: "-0.025em" }}
+              className="type-h3 text-gray-900 mb-6"
             >
               Thanks for stopping by!
             </h2>
 
             {/* Copyright text */}
-            <p className="text-base text-gray-500 mb-1">© Lawrence Zheng 2026</p>
-            <p className="text-base text-gray-500">Made with love, lo-fi beats and lots of iteration.</p>
+            <p className="type-small text-gray-500 mb-1">© Lawrence Zheng 2026</p>
+            <p className="type-small text-gray-500">Made with love, lo-fi beats and lots of iteration.</p>
           </div>
 
           {/* Spacer column on medium+ screens */}
@@ -63,7 +62,7 @@ export default function Footer() {
 
           {/* Contact section - Added padding to align properly */}
           <div className="md:col-span-2 md:pt-[39px]">
-            <h3 className="text-base font-medium text-gray-800 mb-6" style={{ textTransform: "none" }}>
+            <h3 className="type-h4 text-gray-900 mb-6">
               Contact
             </h3>
             <ul className="space-y-2">
@@ -87,7 +86,7 @@ export default function Footer() {
 
           {/* Projects section - Added padding to align properly */}
           <div className="md:col-span-2 md:pt-[39px]">
-            <h3 className="text-base font-medium text-gray-800 mb-6" style={{ textTransform: "none" }}>
+            <h3 className="type-h4 text-gray-900 mb-6">
               Projects
             </h3>
             <ul className="space-y-2">
@@ -111,7 +110,7 @@ export default function Footer() {
 
           {/* Download section - Added padding to align properly */}
           <div className="md:col-span-2 md:pt-[39px]">
-            <h3 className="text-base font-medium text-gray-800 mb-6" style={{ textTransform: "none" }}>
+            <h3 className="type-h4 text-gray-900 mb-6">
               Download
             </h3>
             <ul className="space-y-2">

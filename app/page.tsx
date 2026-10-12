@@ -844,12 +844,12 @@ export default function Home() {
             </div>
 
             {/* Heading - with transition only for the colored headline */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif tracking-tight mb-4 text-center mx-auto hero-text-wrap">
-              <div className="mb-2 font-normal normal-case" style={{ textTransform: "none" }}>
+            <h1 className="type-h1 mb-4 text-center mx-auto hero-text-wrap">
+              <div className="mb-2">
                 Lawrence Zheng
               </div>
               <div
-                className="transition-all duration-300 font-normal normal-case headline-text"
+                className="transition-all duration-300 headline-text"
                 style={{
                   color: primaryColor,
                   opacity: headlineOpacity,
@@ -862,7 +862,7 @@ export default function Home() {
 
             {/* Paragraph - updated with the same transition as the headline */}
             <p
-              className="text-gray-800 mb-4 font-sans max-w-2xl text-center transition-all duration-300 text-base md:text-lg"
+              className="type-body text-gray-700 mb-4 max-w-2xl text-center transition-all duration-300"
               style={{
                 opacity: contentOpacity,
                 transform: contentOpacity < 1 ? "translateY(5px)" : "translateY(0)",
@@ -971,10 +971,7 @@ export default function Home() {
         >
           <div className="bg-white rounded-2xl shadow-lg p-6 pt-5 md:p-10 md:pt-7 lg:p-12 lg:pt-8">
             {/* Section label - matches the navbar link style */}
-            <h2
-              className="font-sans text-sm font-normal uppercase tracking-wider"
-              style={{ color: "rgb(75 85 99)" }}
-            >
+            <h2 className="type-eyebrow text-gray-500">
               Projects
             </h2>
 
@@ -1003,7 +1000,7 @@ export default function Home() {
                       {/* Eyebrow explains the layout slot; the title stays the most visible element */}
                       <div>
                         <p
-                          className="font-sans text-xs font-medium uppercase tracking-[0.15em] mb-2 transition-colors duration-300"
+                          className="type-eyebrow mb-2 transition-colors duration-300"
                           style={{ color: primaryColor }}
                         >
                           Featured
@@ -1011,7 +1008,7 @@ export default function Home() {
                             ? ` · ${filterOptions.find((f) => f.toLowerCase() === activeFilter) ?? activeFilter}`
                             : ""}
                         </p>
-                        <h2 className="font-serif font-normal tracking-tight normal-case text-balance text-[1.75rem] md:text-[2.125rem] lg:text-[2.25rem] xl:text-[2.5rem] leading-tight">
+                        <h2 className="type-h2">
                           <Link
                             href={`/${project.id}`}
                             className="transition-colors duration-300"
@@ -1024,14 +1021,14 @@ export default function Home() {
                           </Link>
                         </h2>
                       </div>
-                      <p className="text-gray-700 font-sans text-base leading-relaxed">{project.description}</p>
+                      <p className="type-body text-gray-700">{project.description}</p>
 
                       {/* Metrics - serif figures carry the outcome; labels stay small and quiet */}
                       <dl className="grid grid-cols-2 gap-x-8 gap-y-6">
                         {project.stats.map((stat, statIndex) => (
                           <div key={statIndex} className="flex flex-col">
-                            <dt className="order-2 mt-2 font-sans text-sm leading-snug text-gray-600">{stat.label}</dt>
-                            <dd className="order-1 font-serif font-normal tracking-tight normal-case text-[1.625rem] md:text-[1.75rem] xl:text-[2rem] leading-none text-black">
+                            <dt className="order-2 mt-2 type-caption text-gray-600">{stat.label}</dt>
+                            <dd className="order-1 type-h3 text-black">
                               {stat.value}
                             </dd>
                           </div>
@@ -1161,7 +1158,7 @@ export default function Home() {
 
                         </div>
 
-                        <h3 className="text-2xl font-serif font-normal tracking-tight leading-snug normal-case mt-6">
+                        <h3 className="type-h3 mt-6">
                           <Link
                             href={href}
                             className="transition-colors duration-300"
@@ -1174,7 +1171,7 @@ export default function Home() {
                           </Link>
                         </h3>
 
-                        <p className="font-sans text-base leading-relaxed mt-2 text-gray-700">
+                        <p className="type-small mt-2 text-gray-700">
                           {project.shortDescription}
                         </p>
 

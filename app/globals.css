@@ -155,6 +155,40 @@ img[src*="decoration"],
   }
 }
 
+/* Type scale. One class per role; each sets family, size, line height, tracking and
+   weight together, so headings never need per-instance tweaks. Only the h1 balances
+   its lines; smaller headings use `pretty` so they fill their column and just avoid orphans. Sizes live in
+   tailwind.config.ts (fontSize). Layout (margins, alignment, color) stays at the call site. */
+@layer components {
+  .type-h1 {
+    @apply font-serif font-normal normal-case text-h1;
+    text-wrap: balance;
+  }
+  .type-h2 {
+    @apply font-serif font-normal normal-case text-h2;
+    text-wrap: pretty;
+  }
+  .type-h3 {
+    @apply font-serif font-normal normal-case text-h3;
+    text-wrap: pretty;
+  }
+  .type-h4 {
+    @apply font-sans font-semibold normal-case text-h4;
+  }
+  .type-body {
+    @apply font-sans font-normal text-body;
+  }
+  .type-small {
+    @apply font-sans font-normal text-small;
+  }
+  .type-caption {
+    @apply font-sans font-normal text-caption;
+  }
+  .type-eyebrow {
+    @apply font-sans font-semibold uppercase text-eyebrow;
+  }
+}
+
 /* Update the emphasized text style to be more bold */
 em {
   font-weight: 700; /* Changed from 600 to 700 for more boldness */
